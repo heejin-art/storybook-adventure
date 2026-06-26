@@ -2,7 +2,12 @@
 
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Points, BufferGeometry, Float32BufferAttribute } from "three";
+import {
+  Points,
+  BufferGeometry,
+  Float32BufferAttribute,
+  AdditiveBlending,
+} from "three";
 import { getToonGradient } from "@/components/character/toonGradient";
 import { Glow } from "@/components/scenery/Glow";
 import { waypointX, WAYPOINTS } from "@/components/world/journeyPath";
@@ -69,6 +74,36 @@ export function MushroomGrove() {
           clickable
         />
       </group>
+
+      {/* 빛기둥(god ray) — 신비로운 수직 빛 */}
+      {[
+        { x: cx + 1.2, z: 0.4, c: "#8ad9ff", h: 5.5, r: 0.9 },
+        { x: cx - 2.5, z: -0.6, c: "#7fe0d2", h: 4.5, r: 0.7 },
+        { x: cx + 3.5, z: 0.2, c: "#caa4ff", h: 4.8, r: 0.7 },
+      ].map((b, i) => (
+        <mesh key={i} position={[b.x, b.h / 2, b.z]}>
+          <coneGeometry args={[b.r, b.h, 12, 1, true]} />
+          <meshBasicMaterial
+            color={b.c}
+            transparent
+            opacity={0.1}
+            blending={AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
+
+      {/* 바닥 안개(haze) — 푸르스름한 미스트 */}
+      {[
+        { x: cx, z: 0.5 },
+        { x: cx - 3, z: -1 },
+        { x: cx + 3.5, z: 1 },
+        { x: cx + 1.5, z: -1.5 },
+      ].map((h, i) => (
+        <group key={`h${i}`} position={[h.x, 0.5, h.z]}>
+          <Glow color="#9fd6e0" size={5} opacity={0.12} />
+        </group>
+      ))}
 
       <Spores cx={cx} />
     </group>

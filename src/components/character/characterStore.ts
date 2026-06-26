@@ -99,8 +99,8 @@ export const characterStore = {
     const now = typeof performance !== "undefined" ? performance.now() : 0;
     greetUntil = now + durationMs;
     behavior = "greet";
-    gazeYaw = 0.8; // 사용자(카메라) 쪽으로 고개
-    gazePitch = 0.1;
+    gazeYaw = 0.6; // 사용자(카메라) 쪽으로 고개 (양수 = 카메라 방향)
+    gazePitch = 0.12;
     emit();
   },
 };

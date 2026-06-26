@@ -19,12 +19,20 @@ const GRAIN =
 export function AtmosphereOverlay() {
   return (
     <div className="pointer-events-none fixed inset-0 z-10">
+      {/* 색 그레이딩 — 따뜻한 하이라이트(위) + 차가운 그림자(아래) */}
+      <div
+        className="absolute inset-0 mix-blend-soft-light"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(255,196,128,0.28) 0%, rgba(255,214,158,0.08) 40%, rgba(120,170,190,0.1) 80%, rgba(96,146,176,0.28) 100%)",
+        }}
+      />
       {/* 비네팅 */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at center, transparent 52%, rgba(44,38,28,0.34) 100%)",
+            "radial-gradient(ellipse at center, transparent 52%, rgba(40,44,52,0.36) 100%)",
         }}
       />
       {/* 필름 그레인 */}

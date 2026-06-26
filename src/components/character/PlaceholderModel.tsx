@@ -32,10 +32,13 @@ export function PlaceholderModel() {
   const legFR = useRef<Mesh>(null);
   const legBL = useRef<Mesh>(null);
   const legBR = useRef<Mesh>(null);
-  const eyeL = useRef<Mesh>(null);
-  const eyeR = useRef<Mesh>(null);
+  const eyeL = useRef<Group>(null);
+  const eyeR = useRef<Group>(null);
   const earL = useRef<Group>(null);
   const earR = useRef<Group>(null);
+  const stillTime = useRef(0); // 멈춰 있던 시간 → 멈추면 자연스레 플레이어를 봄
+  const earTwitchT = useRef(0);
+  const nextTwitch = useRef(2);
 
   const t = useRef(0);
   const beatT = useRef(0);
@@ -101,12 +104,17 @@ export function PlaceholderModel() {
     if (eyeL.current) eyeL.current.scale.y = eyeScaleY;
     if (eyeR.current) eyeR.current.scale.y = eyeScaleY;
 
+    // 멈춰 있던 시간 → 멈추면 자연스럽게 플레이어(카메라)를 바라봄
+    if (!isMoving && s.behavior === "none") stillTime.current += delta;
+    else stillTime.current = 0;
+    const idleLook = Math.min(stillTime.current / 1.2, 1); // 멈추고 ~1.2초 뒤 정면
+
     // 가끔 두리번거림(idle glance) — 멈춰 있을 때 고개를 천천히 돌렸다 돌아옴
     glanceT.current += delta;
     if (s.behavior === "none" && !isMoving) {
       if (glanceT.current > nextGlance.current) {
-        glanceYaw.current = Math.sin(time * 11.3) * 0.45;
-        if (glanceT.current > nextGlance.current + 1.7) {
+        glanceYaw.current = Math.sin(time * 11.3) * 0.4;
+        if (glanceT.current > nextGlance.current + 1.6) {
           glanceT.current = 0;
           nextGlance.current = 3 + Math.abs(Math.sin(time * 7.7)) * 4.5;
           glanceYaw.current = 0;
@@ -116,32 +124,35 @@ export function PlaceholderModel() {
       glanceYaw.current = 0;
     }
 
-    // ── 머리: 시선(gaze) + idle 잔잔한 흔들림 + 두리번 ──
+    // ── 머리: 시선(gaze) + idle 흔들림 + 두리번 + 멈추면 플레이어 보기 ──
     if (head.current) {
-      const idleYaw = !isMoving ? Math.sin(time * 0.8) * 0.06 : 0;
+      const idleYaw = !isMoving ? Math.sin(time * 0.8) * 0.05 : 0;
       const idlePitch = !isMoving ? Math.sin(time * 1.1) * 0.04 : 0;
-      const targetYaw = s.gazeYaw * 0.9 + idleYaw + glanceYaw.current;
+      // gazeYaw>0 = 카메라(+Z, 사용자) 쪽을 바라봄. 멈추면 idleLook만큼 정면을 봄
+      const targetYaw =
+        -s.gazeYaw * 0.9 - idleLook * 0.34 + idleYaw + glanceYaw.current;
       const targetPitch = -s.gazePitch * 0.7 + idlePitch;
-      head.current.rotation.y = MathUtils.lerp(
-        head.current.rotation.y,
-        targetYaw,
-        0.1,
-      );
-      head.current.rotation.x = MathUtils.lerp(
-        head.current.rotation.x,
-        targetPitch,
-        0.1,
-      );
+      head.current.rotation.y = MathUtils.lerp(head.current.rotation.y, targetYaw, 0.1);
+      head.current.rotation.x = MathUtils.lerp(head.current.rotation.x, targetPitch, 0.1);
     }
 
-    // ── 귀: 걸을 때 펄럭, 멈추면 살랑, 달릴 때 뒤로 ──
+    // ── 귀: 걸을 때 펄럭, 멈추면 살랑 + 가끔 쫑긋 트위치 ──
+    earTwitchT.current += delta;
+    let twitch = 0;
+    if (earTwitchT.current > nextTwitch.current) {
+      const into = earTwitchT.current - nextTwitch.current;
+      if (into < 0.18) twitch = Math.sin((into / 0.18) * Math.PI) * 0.35;
+      else {
+        earTwitchT.current = 0;
+        nextTwitch.current = 1.5 + Math.abs(Math.sin(time * 5.1)) * 4;
+      }
+    }
     if (earL.current && earR.current) {
-      const flap = Math.sin(time * speed) * 0.28 * move;
-      const idleEar = Math.sin(time * 1.4) * 0.06 * (1 - move);
-      const flopBack = -move * 0.18;
-      const zr = 0.18 + flap + idleEar;
-      earL.current.rotation.z = zr;
-      earR.current.rotation.z = zr;
+      const flap = Math.sin(time * speed) * 0.34 * move;
+      const idleEar = Math.sin(time * 1.5) * 0.07 * (1 - move);
+      const flopBack = -move * 0.2;
+      earL.current.rotation.z = 0.18 + flap + idleEar - twitch;
+      earR.current.rotation.z = 0.18 + flap + idleEar - twitch;
       earL.current.rotation.x = MathUtils.lerp(earL.current.rotation.x, flopBack, 0.1);
       earR.current.rotation.x = MathUtils.lerp(earR.current.rotation.x, flopBack, 0.1);
     }
@@ -161,11 +172,13 @@ export function PlaceholderModel() {
     if (tail.current) {
       const excited =
         s.behavior === "greet" || s.behavior === "watchButterfly" || isMoving;
-      const wagSpeed = s.behavior === "greet" ? 17 : excited ? 11 : 4;
-      const wagAmp = s.behavior === "greet" ? 0.7 : 0.45;
+      const wagSpeed = s.behavior === "greet" ? 18 : excited ? 12 : 5.5;
+      const wagAmp = s.behavior === "greet" ? 0.8 : excited ? 0.55 : 0.42;
       tail.current.rotation.y = Math.sin(time * wagSpeed) * wagAmp;
-      // 걸을 때 위아래로 따라 출렁(2차 모션, 약간의 지연)
-      tail.current.rotation.x = Math.sin(time * speed + 0.6) * 0.2 * move;
+      // 걸을 때 위아래로 따라 출렁 + 멈춰도 살짝 살랑(2차 모션)
+      tail.current.rotation.x =
+        Math.sin(time * speed + 0.6) * 0.22 * move +
+        Math.sin(time * 2.0) * 0.06 * (1 - move);
     }
 
     if (!root.current) return;
@@ -173,9 +186,11 @@ export function PlaceholderModel() {
     // ── 앉기(sit): 뒤를 낮추고 살짝 기울임 ──
     const sitDrop = isSitting ? -0.16 : 0;
     const sitTilt = isSitting ? 0.16 : 0;
-    // ── 돌아보기/인사: 몸을 카메라 쪽으로 살짝 틀기 ──
+    // ── 돌아보기/인사/멈춤: 몸을 카메라(+Z) 쪽으로 틀기 (음수 = 카메라 방향) ──
     const turn =
-      s.behavior === "lookBack" || s.behavior === "greet" ? 0.5 : 0;
+      s.behavior === "lookBack" || s.behavior === "greet"
+        ? -0.6
+        : -idleLook * 0.22;
     // ── 인사 시 작은 깡총 ──
     const hop =
       s.behavior === "greet"
@@ -213,12 +228,18 @@ export function PlaceholderModel() {
           <capsuleGeometry args={[0.42, 0.62, 8, 16]} />
           <meshToonMaterial {...fur} />
         </mesh>
-        {/* 복슬 puff들 */}
+        {/* 복슬 puff들 — 둥글둥글한 비숑 실루엣 */}
         <Puff p={[0.32, 0.66, 0]} r={0.3} m={fur} />
         <Puff p={[-0.32, 0.64, 0]} r={0.3} m={fur} />
         <Puff p={[0, 0.86, 0]} r={0.26} m={fur} />
         <Puff p={[0, 0.5, 0.24]} r={0.24} m={furShade} />
         <Puff p={[0, 0.5, -0.24]} r={0.24} m={furShade} />
+        <Puff p={[0.46, 0.52, 0]} r={0.24} m={fur} />
+        <Puff p={[-0.46, 0.58, 0]} r={0.27} m={fur} />
+        <Puff p={[0.16, 0.36, 0.22]} r={0.19} m={furShade} />
+        <Puff p={[0.16, 0.36, -0.22]} r={0.19} m={furShade} />
+        <Puff p={[-0.18, 0.92, 0.16]} r={0.18} m={fur} />
+        <Puff p={[-0.18, 0.92, -0.16]} r={0.18} m={fur} />
 
         {/* 머리 — 앞쪽(+X) 위 */}
         <group ref={head} position={[0.58, 1.18, 0]}>
@@ -251,21 +272,50 @@ export function PlaceholderModel() {
               <sphereGeometry args={[0.07, 12, 12]} />
               <meshToonMaterial color={NOSE} gradientMap={grad} />
             </mesh>
+            {/* 입 (작은 점) */}
+            <mesh position={[0.17, -0.11, 0]} scale={[0.7, 0.45, 0.6]}>
+              <sphereGeometry args={[0.03, 8, 8]} />
+              <meshStandardMaterial color="#6b5648" roughness={0.5} />
+            </mesh>
           </group>
 
-          {/* 눈 (측면이라 카메라쪽 한 개가 주로 보임) — 깜빡임 */}
-          <mesh ref={eyeL} position={[0.22, 0.06, 0.2]}>
-            <sphereGeometry args={[0.055, 12, 12]} />
-            <meshBasicMaterial color={NOSE} />
+          {/* 눈 — 작고 동그란 점눈(반짝임 하이라이트) + 깜빡임(그룹 scale.y) */}
+          <group ref={eyeL} position={[0.24, 0.07, 0.19]}>
+            <mesh>
+              <sphereGeometry args={[0.062, 14, 14]} />
+              <meshStandardMaterial color="#2c2722" roughness={0.25} />
+            </mesh>
+            <mesh position={[0.05, 0.035, 0.025]}>
+              <sphereGeometry args={[0.022, 8, 8]} />
+              <meshBasicMaterial color="#ffffff" />
+            </mesh>
+            <mesh position={[0.0, -0.03, 0.05]}>
+              <sphereGeometry args={[0.011, 8, 8]} />
+              <meshBasicMaterial color="#ffffff" />
+            </mesh>
+          </group>
+          <group ref={eyeR} position={[0.24, 0.07, -0.19]}>
+            <mesh>
+              <sphereGeometry args={[0.062, 14, 14]} />
+              <meshStandardMaterial color="#2c2722" roughness={0.25} />
+            </mesh>
+            <mesh position={[0.05, 0.035, -0.025]}>
+              <sphereGeometry args={[0.022, 8, 8]} />
+              <meshBasicMaterial color="#ffffff" />
+            </mesh>
+            <mesh position={[0.0, -0.03, -0.05]}>
+              <sphereGeometry args={[0.011, 8, 8]} />
+              <meshBasicMaterial color="#ffffff" />
+            </mesh>
+          </group>
+          {/* 볼터치(발그레) */}
+          <mesh position={[0.18, -0.05, 0.27]} scale={[0.5, 0.34, 0.34]}>
+            <sphereGeometry args={[0.1, 10, 10]} />
+            <meshBasicMaterial color="#f4a6b6" transparent opacity={0.5} />
           </mesh>
-          <mesh ref={eyeR} position={[0.22, 0.06, -0.2]}>
-            <sphereGeometry args={[0.055, 12, 12]} />
-            <meshBasicMaterial color={NOSE} />
-          </mesh>
-          {/* 눈 하이라이트 */}
-          <mesh position={[0.26, 0.1, 0.22]}>
-            <sphereGeometry args={[0.016, 8, 8]} />
-            <meshBasicMaterial color="#ffffff" />
+          <mesh position={[0.18, -0.05, -0.27]} scale={[0.5, 0.34, 0.34]}>
+            <sphereGeometry args={[0.1, 10, 10]} />
+            <meshBasicMaterial color="#f4a6b6" transparent opacity={0.5} />
           </mesh>
         </group>
 

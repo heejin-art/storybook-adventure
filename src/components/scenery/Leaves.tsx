@@ -5,7 +5,8 @@ import { useFrame, useThree } from "@react-three/fiber";
 import {
   InstancedMesh,
   Object3D,
-  PlaneGeometry,
+  Shape,
+  ShapeGeometry,
   MeshBasicMaterial,
   DoubleSide,
   Color,
@@ -28,7 +29,13 @@ export function Leaves() {
   const { camera } = useThree();
 
   const geometry = useMemo(() => {
-    const g = new PlaneGeometry(0.16, 0.1);
+    // 잎사귀 모양(뾰족한 타원)
+    const shape = new Shape();
+    shape.moveTo(0, -0.07);
+    shape.quadraticCurveTo(0.1, -0.02, 0, 0.08);
+    shape.quadraticCurveTo(-0.1, -0.02, 0, -0.07);
+    const g = new ShapeGeometry(shape);
+    g.center();
     return g;
   }, []);
   const material = useMemo(
