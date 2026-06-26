@@ -5,29 +5,20 @@ import { useFrame } from "@react-three/fiber";
 import { Group } from "three";
 import { getToonGradient } from "@/components/character/toonGradient";
 import { Glow } from "@/components/scenery/Glow";
+import { Marker } from "@/components/world/Marker";
 import { waypointX, WAYPOINTS } from "@/components/world/journeyPath";
-import { journeyStore } from "@/components/world/journeyStore";
-import { discoveryStore } from "@/components/world/discoveryStore";
 
 /**
  * 강·다리 (Business Story) — 잔잔한 강 + 나무다리 + 윤슬(물빛 반짝임).
- * 또또가 다가가면 사업 이야기가 흐르고(discovery: business),
- * 강 앞에서 잠깐 앉아 물을 바라본다(BehaviorDirector가 'sit' 처리).
+ * 다리 위 마커를 클릭하면 사업 이야기가 열린다. 또또는 강 앞에서 앉아 물을 바라봄(director).
  */
 export function RiverBridge() {
   const cx = waypointX(WAYPOINTS.river);
   const grad = getToonGradient();
 
-  useFrame(() => {
-    const { progress } = journeyStore.read();
-    const near = Math.abs(progress - WAYPOINTS.river) < 0.05;
-    if (near) discoveryStore.set("business");
-    else if (discoveryStore.getSnapshot() === "business")
-      discoveryStore.set(null);
-  });
-
   return (
     <group>
+      <Marker id="business" position={[cx, 1.9, 0]} color="#bcd0f0" label="사업 이야기" />
       {/* 강물 (앞뒤로 길게 흐르는 잔잔한 수면) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[cx, 0.04, 0]} receiveShadow>
         <planeGeometry args={[6.5, 44]} />

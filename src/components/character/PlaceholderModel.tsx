@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Group, Mesh, MathUtils } from "three";
-import { characterStore, type BehaviorBeat } from "./characterStore";
+import { characterStore, type BehaviorBeat, type TrickName } from "./characterStore";
 import { getToonGradient } from "./toonGradient";
 
 /**
@@ -50,6 +50,8 @@ export function PlaceholderModel() {
   const glanceT = useRef(0);
   const nextGlance = useRef(3);
   const glanceYaw = useRef(0);
+  const prevTrick = useRef<TrickName | null>(null);
+  const trickT = useRef(0);
 
   useFrame((_, delta) => {
     const s = characterStore.read();
@@ -59,6 +61,12 @@ export function PlaceholderModel() {
       beatT.current = 0;
     }
     beatT.current += delta;
+    // 트릭 타이머
+    if (s.trick !== prevTrick.current) {
+      prevTrick.current = s.trick;
+      trickT.current = 0;
+    }
+    trickT.current += delta;
     const time = t.current;
 
     const isMoving = s.locomotion === "walk" || s.locomotion === "run";
@@ -183,37 +191,92 @@ export function PlaceholderModel() {
 
     if (!root.current) return;
 
-    // ── 앉기(sit): 뒤를 낮추고 살짝 기울임 ──
+    // ── 기본 포즈(앉기/인사/멈춤) ──
     const sitDrop = isSitting ? -0.16 : 0;
     const sitTilt = isSitting ? 0.16 : 0;
-    // ── 돌아보기/인사/멈춤: 몸을 카메라(+Z) 쪽으로 틀기 (음수 = 카메라 방향) ──
     const turn =
       s.behavior === "lookBack" || s.behavior === "greet"
         ? -0.6
         : -idleLook * 0.22;
-    // ── 인사 시 작은 깡총 ──
     const hop =
       s.behavior === "greet"
         ? Math.max(0, Math.sin(beatT.current * 6)) * 0.12
         : 0;
-
-    root.current.position.y = MathUtils.lerp(
-      root.current.position.y,
-      sitDrop + hop,
-      0.18,
-    );
-    // 멈췄을 때 살짝 무게중심 이동(살아있는 느낌)
     const idleSway = isSitting ? 0 : Math.sin(time * 0.7) * 0.025 * (1 - move);
-    root.current.rotation.z = MathUtils.lerp(
-      root.current.rotation.z,
-      sitTilt + idleSway,
-      0.12,
-    );
-    root.current.rotation.y = MathUtils.lerp(
-      root.current.rotation.y,
-      turn,
-      0.1,
-    );
+
+    let targetY = sitDrop + hop;
+    let targetZ = sitTilt + idleSway;
+    let targetYrot = turn;
+    let lerpY = 0.18;
+    let lerpZ = 0.12;
+    let lerpYrot = 0.1;
+
+    // ── 트릭(버튼) 오버라이드 ──
+    const tt = trickT.current;
+    const legSet = (z: number) => {
+      if (legFL.current) legFL.current.rotation.z = z;
+      if (legBL.current) legBL.current.rotation.z = z;
+      if (legFR.current) legFR.current.rotation.z = -z;
+      if (legBR.current) legBR.current.rotation.z = -z;
+    };
+    switch (s.trick) {
+      case "jump": {
+        const p = Math.min(tt / 0.8, 1);
+        targetY = Math.sin(p * Math.PI) * 0.7;
+        targetZ = 0;
+        lerpY = 0.4;
+        break;
+      }
+      case "sit": {
+        targetY = -0.16;
+        targetZ = 0.22;
+        targetYrot = -0.5; // 앉아서 사용자를 봄
+        break;
+      }
+      case "lieDown": {
+        targetY = -0.34;
+        targetZ = 0;
+        targetYrot = -0.3;
+        legSet(1.15); // 앞다리 앞으로 뻗어 엎드림
+        break;
+      }
+      case "bang": {
+        const p = Math.min(tt / 0.45, 1);
+        targetZ = -1.5 * p; // 옆으로 뒤집힘 (빵야!)
+        targetY = -0.24 * p;
+        lerpZ = 0.25;
+        if (legFL.current) legFL.current.rotation.z = 0.5;
+        if (legBL.current) legBL.current.rotation.z = 0.5;
+        if (legFR.current) legFR.current.rotation.z = -0.5;
+        if (legBR.current) legBR.current.rotation.z = -0.5;
+        break;
+      }
+      case "spin": {
+        targetYrot = (tt / 1.1) * Math.PI * 2; // 한 바퀴
+        lerpYrot = 1;
+        targetY = Math.sin((tt / 1.1) * Math.PI) * 0.12;
+        break;
+      }
+      case "roll": {
+        targetZ = (tt / 1.4) * Math.PI * 2; // 데굴 한 바퀴
+        lerpZ = 1;
+        targetY = -0.1;
+        break;
+      }
+      case "shake": {
+        if (legFR.current)
+          legFR.current.rotation.z = -1.1 + Math.sin(tt * 11) * 0.32; // 손!
+        targetZ = 0.1;
+        targetYrot = -0.5;
+        break;
+      }
+      default:
+        break;
+    }
+
+    root.current.position.y = MathUtils.lerp(root.current.position.y, targetY, lerpY);
+    root.current.rotation.z = MathUtils.lerp(root.current.rotation.z, targetZ, lerpZ);
+    root.current.rotation.y = MathUtils.lerp(root.current.rotation.y, targetYrot, lerpYrot);
   });
 
   // toon 재질 공통 props

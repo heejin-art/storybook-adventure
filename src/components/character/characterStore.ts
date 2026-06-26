@@ -21,6 +21,26 @@ export type BehaviorBeat =
   | "lookBack" // ⭐ 사용자를 돌아봄
   | "greet"; // 클릭 시 인사
 
+/** 버튼으로 시키는 한 번짜리 트릭 */
+export type TrickName =
+  | "jump"
+  | "sit"
+  | "lieDown"
+  | "bang"
+  | "spin"
+  | "shake"
+  | "roll";
+
+export const TRICK_DURATION: Record<TrickName, number> = {
+  jump: 800,
+  sit: 1800,
+  lieDown: 2000,
+  bang: 2200,
+  spin: 1100,
+  shake: 1400,
+  roll: 1400,
+};
+
 type Snapshot = {
   locomotion: LocomotionState;
   intensity: number;
@@ -28,6 +48,7 @@ type Snapshot = {
   /** 머리 시선 오프셋(-1~1): yaw=좌우, pitch=상하(+위) */
   gazeYaw: number;
   gazePitch: number;
+  trick: TrickName | null;
 };
 
 let locomotion: LocomotionState = "idle";
@@ -35,6 +56,8 @@ let intensity = 0;
 let behavior: BehaviorBeat = "none";
 let gazeYaw = 0;
 let gazePitch = 0;
+let trick: TrickName | null = null;
+let trickTimer: ReturnType<typeof setTimeout> | null = null;
 
 let greetUntil = 0; // greet 비트 종료 시각(performance.now 기준)
 
@@ -44,11 +67,12 @@ let cached: Snapshot = {
   behavior: "none",
   gazeYaw: 0,
   gazePitch: 0,
+  trick: null,
 };
 const listeners = new Set<() => void>();
 
 function snapshot(): Snapshot {
-  return { locomotion, intensity, behavior, gazeYaw, gazePitch };
+  return { locomotion, intensity, behavior, gazeYaw, gazePitch, trick };
 }
 
 function emit() {
@@ -56,6 +80,7 @@ function emit() {
   if (
     next.locomotion !== cached.locomotion ||
     next.behavior !== cached.behavior ||
+    next.trick !== cached.trick ||
     Math.abs(next.intensity - cached.intensity) > 0.02
   ) {
     cached = next;
@@ -92,6 +117,18 @@ export const characterStore = {
     gazeYaw = yaw;
     gazePitch = pitch;
     emit();
+  },
+
+  /** 버튼으로 트릭 시키기 (한 번 재생 후 자동 해제) */
+  playTrick(name: TrickName) {
+    trick = name;
+    emit();
+    if (trickTimer) clearTimeout(trickTimer);
+    trickTimer = setTimeout(() => {
+      trick = null;
+      trickTimer = null;
+      emit();
+    }, TRICK_DURATION[name]);
   },
 
   /** 또또 클릭 → 잠깐 인사(돌아보며 꼬리 흔들기). director보다 우선. */

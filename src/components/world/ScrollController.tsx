@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Lenis from "lenis";
 import { journeyStore } from "./journeyStore";
+import { discoveryStore } from "./discoveryStore";
 
 /**
  * 스크롤 → 여정 진행도 변환기.
@@ -30,6 +31,12 @@ export function ScrollController({ heightVh = 700 }: { heightVh?: number }) {
 
     lenis.on("scroll", update);
 
+    // 콘텐츠가 열려 있는 동안엔 스크롤을 멈춰 차분히 읽게 한다
+    const unsub = discoveryStore.subscribe(() => {
+      if (discoveryStore.active) lenis.stop();
+      else lenis.start();
+    });
+
     let rafId = 0;
     const raf = (time: number) => {
       lenis.raf(time);
@@ -40,6 +47,7 @@ export function ScrollController({ heightVh = 700 }: { heightVh?: number }) {
 
     return () => {
       cancelAnimationFrame(rafId);
+      unsub();
       lenis.destroy();
     };
   }, []);

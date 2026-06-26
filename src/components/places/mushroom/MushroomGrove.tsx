@@ -10,8 +10,8 @@ import {
 } from "three";
 import { getToonGradient } from "@/components/character/toonGradient";
 import { Glow } from "@/components/scenery/Glow";
+import { ClickHint } from "@/components/world/ClickHint";
 import { waypointX, WAYPOINTS } from "@/components/world/journeyPath";
-import { journeyStore } from "@/components/world/journeyStore";
 import { discoveryStore } from "@/components/world/discoveryStore";
 
 /**
@@ -43,14 +43,6 @@ export function MushroomGrove() {
       })),
     [cx],
   );
-
-  // 장소를 벗어나면 notalk 닫기
-  useFrame(() => {
-    const { progress } = journeyStore.read();
-    const inGrove = Math.abs(progress - WAYPOINTS.mushroom) < 0.08;
-    if (!inGrove && discoveryStore.getSnapshot() === "notalk")
-      discoveryStore.set(null);
-  });
 
   return (
     <group>
@@ -135,7 +127,7 @@ function Mushroom({
         clickable
           ? (e) => {
               e.stopPropagation();
-              discoveryStore.set("notalk");
+              discoveryStore.open("notalk");
             }
           : undefined
       }
@@ -167,7 +159,12 @@ function Mushroom({
         <Glow color={glow} size={clickable ? 2.4 : 1.3} opacity={clickable ? 0.7 : 0.45} pulse={clickable ? 1.0 : 0.6} />
       </group>
       {clickable && (
-        <pointLight position={[0, 0.8, 0]} color={glow} intensity={6} distance={5} decay={2} />
+        <>
+          <pointLight position={[0, 0.8, 0]} color={glow} intensity={6} distance={5} decay={2} />
+          <group position={[0, 1.5, 0]}>
+            <ClickHint label="프로젝트 보기" />
+          </group>
+        </>
       )}
     </group>
   );

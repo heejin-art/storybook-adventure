@@ -14,6 +14,7 @@ import { Rocks } from "@/components/scenery/Rocks";
 import { Pollen } from "@/components/scenery/Pollen";
 import { Leaves } from "@/components/scenery/Leaves";
 import { SunGlow } from "@/components/scenery/SunGlow";
+import { Clouds } from "@/components/scenery/Clouds";
 import { Stars } from "@/components/scenery/Stars";
 import { Fireflies } from "@/components/scenery/Fireflies";
 import { Butterfly } from "@/components/scenery/Butterfly";
@@ -44,6 +45,7 @@ export function WorldCanvas() {
         <Atmosphere />
         <SkyGradient />
         <SunGlow />
+        <Clouds />
 
         <Suspense fallback={null}>
           {/* 원경 → 근경 풍경 (월드 고정, 카메라가 지나가며 패럴럭스) */}

@@ -2,9 +2,10 @@
 
 import dynamic from "next/dynamic";
 import { ScrollController } from "@/components/world/ScrollController";
-import { StartHint } from "@/components/ui/StartHint";
+import { Hero } from "@/components/ui/Hero";
 import { DiscoveryOverlay } from "@/components/ui/DiscoveryOverlay";
 import { AtmosphereOverlay } from "@/components/ui/AtmosphereOverlay";
+import { TrickBar } from "@/components/ui/TrickBar";
 
 // 3D 캔버스는 SSR 비활성(브라우저 전용 API 사용)
 const WorldCanvas = dynamic(
@@ -24,8 +25,9 @@ export default function Home() {
     <>
       <WorldCanvas />
       <AtmosphereOverlay />
-      <StartHint />
+      <Hero />
       <DiscoveryOverlay />
+      <TrickBar />
       <ScrollController heightVh={1800} />
     </>
   );

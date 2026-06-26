@@ -1,86 +1,93 @@
 "use client";
 
-import { useFrame } from "@react-three/fiber";
+import { useMemo } from "react";
 import { getToonGradient } from "@/components/character/toonGradient";
-import { Glow } from "@/components/scenery/Glow";
+import { Marker } from "@/components/world/Marker";
 import {
   waypointX,
-  careerNodeProgress,
+  WAYPOINTS,
 } from "@/components/world/journeyPath";
-import { journeyStore } from "@/components/world/journeyStore";
-import { discoveryStore } from "@/components/world/discoveryStore";
-import { careerJourney } from "@/data/career";
 
 /**
- * 숲길(Career Journey) — 길을 따라 선 작은 등불 이정표들.
- * 타임라인이 아니라, 걸으며 자연스럽게 하나씩 만나는 경력.
- * 또또가 이정표에 다가가면 그 경력 한 줄이 발견된다(discovery: career-<i>).
+ * 숲길(Career) — 길을 따라 흩뿌려진 강아지 간식(뼈다귀)들 🦴 + 하나의 요약 마커.
+ * 마커를 클릭하면 희진의 커리어 "핵심 요약"이 한 번에 열린다(경력 보기 6개 → 1개로 통합).
+ * 또또 테마답게, 길은 간식으로 꾸며진다.
  */
-const TOTAL = careerJourney.length;
+function seeded(i: number, s: number) {
+  const x = Math.sin(i * 12.9898 + s * 78.233) * 43758.5453;
+  return x - Math.floor(x);
+}
 
 export function CareerPath() {
-  useFrame(() => {
-    const { progress } = journeyStore.read();
-    let nearest = -1;
-    let best = 0.028;
-    for (let i = 0; i < TOTAL; i++) {
-      const d = Math.abs(progress - careerNodeProgress(i, TOTAL));
-      if (d < best) {
-        best = d;
-        nearest = i;
-      }
-    }
-    if (nearest >= 0) discoveryStore.set(`career-${nearest}`);
-    else if ((discoveryStore.getSnapshot() ?? "").startsWith("career-"))
-      discoveryStore.set(null);
-  });
+  const start = waypointX(WAYPOINTS.careerStart);
+  const end = waypointX(WAYPOINTS.careerEnd);
+  const mid = (start + end) / 2;
+
+  const treats = useMemo(
+    () =>
+      Array.from({ length: 9 }, (_, i) => ({
+        x: start + ((end - start) * (i + 0.5)) / 9 + (seeded(i, 1) - 0.5) * 1.2,
+        z: -1.6 + seeded(i, 2) * 3.2,
+        rot: seeded(i, 3) * Math.PI,
+        s: 0.7 + seeded(i, 4) * 0.5,
+        bone: seeded(i, 5) > 0.45,
+        key: i,
+      })),
+    [start, end],
+  );
 
   return (
     <group>
-      {careerJourney.map((_, i) => (
-        <Lantern
-          key={i}
-          x={waypointX(careerNodeProgress(i, TOTAL))}
-          z={i % 2 === 0 ? -1.4 : 1.6}
-        />
+      {treats.map((t) =>
+        t.bone ? (
+          <Bone key={t.key} x={t.x} z={t.z} rot={t.rot} s={t.s} />
+        ) : (
+          <Treat key={t.key} x={t.x} z={t.z} rot={t.rot} s={t.s} />
+        ),
+      )}
+      {/* 핵심 요약 마커 (커리어 전체를 한 번에) */}
+      <Marker id="career" position={[mid, 1.7, 0]} color="#ffcf8a" label="희진의 길" />
+    </group>
+  );
+}
+
+/** 뼈다귀 간식 🦴 */
+function Bone({ x, z, rot, s }: { x: number; z: number; rot: number; s: number }) {
+  const grad = getToonGradient();
+  return (
+    <group position={[x, 0.12 * s, z]} rotation={[0, rot, Math.PI / 2]} scale={s}>
+      {/* 가운데 막대 */}
+      <mesh castShadow>
+        <capsuleGeometry args={[0.05, 0.26, 6, 10]} />
+        <meshToonMaterial color="#f3ead8" gradientMap={grad} />
+      </mesh>
+      {/* 양끝 혹 */}
+      {[0.2, -0.2].map((y, i) => (
+        <group key={i} position={[0, y, 0]}>
+          <mesh position={[0.06, 0, 0]}>
+            <sphereGeometry args={[0.07, 10, 10]} />
+            <meshToonMaterial color="#f3ead8" gradientMap={grad} />
+          </mesh>
+          <mesh position={[-0.06, 0, 0]}>
+            <sphereGeometry args={[0.07, 10, 10]} />
+            <meshToonMaterial color="#f3ead8" gradientMap={grad} />
+          </mesh>
+        </group>
       ))}
     </group>
   );
 }
 
-function Lantern({ x, z }: { x: number; z: number }) {
+/** 작은 간식 🍪 (둥근 갈색 알갱이) */
+function Treat({ x, z, rot, s }: { x: number; z: number; rot: number; s: number }) {
   const grad = getToonGradient();
+  const c = ["#caa06a", "#b5793f", "#9c6b3f"];
   return (
-    <group position={[x, 0, z]}>
-      {/* 기둥 */}
-      <mesh position={[0, 0.6, 0]} castShadow>
-        <cylinderGeometry args={[0.05, 0.06, 1.2, 6]} />
-        <meshToonMaterial color="#7c5c40" gradientMap={grad} />
+    <group position={[x, 0.09 * s, z]} rotation={[0, rot, 0]} scale={s}>
+      <mesh castShadow>
+        <dodecahedronGeometry args={[0.12, 0]} />
+        <meshToonMaterial color={c[Math.floor(seeded(x, 7) * c.length)]} gradientMap={grad} />
       </mesh>
-      {/* 가로대 */}
-      <mesh position={[0.12, 1.15, 0]}>
-        <boxGeometry args={[0.3, 0.05, 0.05]} />
-        <meshToonMaterial color="#7c5c40" gradientMap={grad} />
-      </mesh>
-      {/* 등불(따뜻한 빛) */}
-      <mesh position={[0.24, 1.0, 0]}>
-        <sphereGeometry args={[0.12, 12, 12]} />
-        <meshStandardMaterial
-          color="#ffdf9e"
-          emissive="#ffbf57"
-          emissiveIntensity={1.4}
-        />
-      </mesh>
-      <group position={[0.24, 1.0, 0]}>
-        <Glow color="#ffc46a" size={1.6} opacity={0.6} pulse={0.8} />
-      </group>
-      <pointLight
-        position={[0.24, 1.0, 0]}
-        color="#ffcf80"
-        intensity={6}
-        distance={3.5}
-        decay={2}
-      />
     </group>
   );
 }

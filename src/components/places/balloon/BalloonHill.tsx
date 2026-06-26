@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Group, MathUtils } from "three";
 import { Glow } from "@/components/scenery/Glow";
+import { ClickHint } from "@/components/world/ClickHint";
 import { waypointX, WAYPOINTS } from "@/components/world/journeyPath";
-import { journeyStore } from "@/components/world/journeyStore";
 import { discoveryStore } from "@/components/world/discoveryStore";
 
 /**
@@ -35,16 +35,6 @@ export function BalloonHill() {
       })),
     [cx],
   );
-
-  // 장소를 벗어나면 todaypop 닫기
-  useFrame(() => {
-    const { progress } = journeyStore.read();
-    if (
-      Math.abs(progress - WAYPOINTS.balloon) > 0.08 &&
-      discoveryStore.getSnapshot() === "todaypop"
-    )
-      discoveryStore.set(null);
-  });
 
   return (
     <group>
@@ -104,7 +94,7 @@ function Balloon({
       ref={g}
       onClick={(e) => {
         e.stopPropagation();
-        discoveryStore.set("todaypop");
+        discoveryStore.open("todaypop");
         popped.current = 1;
         popTimer.current = 0;
       }}
@@ -133,6 +123,9 @@ function Balloon({
       </mesh>
       {/* 빛 번짐 */}
       <Glow color={color} size={1.5} opacity={0.4} pulse={0.7} />
+      <group position={[0, 0.6, 0]}>
+        <ClickHint label="터뜨리기" />
+      </group>
     </group>
   );
 }

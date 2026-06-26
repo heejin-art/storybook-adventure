@@ -4,9 +4,9 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { BufferGeometry, Float32BufferAttribute, Group } from "three";
 import { Glow } from "@/components/scenery/Glow";
+import { Marker } from "@/components/world/Marker";
 import { waypointX, WAYPOINTS } from "@/components/world/journeyPath";
 import { journeyStore } from "@/components/world/journeyStore";
-import { discoveryStore } from "@/components/world/discoveryStore";
 
 /**
  * 별언덕 (Future) — 밤하늘에 빛나는 별들이 별자리로 이어진다.
@@ -38,10 +38,6 @@ export function StarHill() {
 
   useFrame(() => {
     const { progress } = journeyStore.read();
-    const near = Math.abs(progress - WAYPOINTS.star) < 0.045;
-    if (near) discoveryStore.set("future");
-    else if (discoveryStore.getSnapshot() === "future") discoveryStore.set(null);
-
     // 밤이 되면 별자리가 떠오름
     const vis = Math.max(0, Math.min(1, (progress - 0.8) / 0.06));
     groupOpacity.current += (vis - groupOpacity.current) * 0.05;
@@ -49,6 +45,8 @@ export function StarHill() {
   });
 
   return (
+    <group>
+    <Marker id="future" position={[cx, 2.4, -1]} color="#cfe0ff" label="앞으로의 꿈" />
     <group ref={root} position={[cx, 4.5, -3]}>
       {/* 별자리 선 */}
       <line>
@@ -70,6 +68,7 @@ export function StarHill() {
           <Glow color="#fff2c4" size={1.3} opacity={0.7} pulse={1.0 + i * 0.2} />
         </group>
       ))}
+    </group>
     </group>
   );
 }

@@ -58,6 +58,15 @@ html.lenis body {
   border-radius: 9999px;
 }
 
+/* 클릭 힌트 통통 튀기 */
+@keyframes clickhint-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+.totto-clickhint {
+  animation: clickhint-bob 1.4s ease-in-out infinite;
+}
+
 /* 공통 유틸: 동화책 카드 */
 .story-card {
   background: rgba(255, 255, 255, 0.72);
