@@ -1,6 +1,7 @@
 "use client";
 
 import { getToonGradient } from "@/components/character/toonGradient";
+import { Glow } from "@/components/scenery/Glow";
 
 /**
  * 작은 집 — 여정의 출발점이자 About의 장소.
@@ -42,6 +43,13 @@ export function House({ position = [0, 0, 0] as [number, number, number] }) {
           emissiveIntensity={0.9}
         />
       </mesh>
+      {/* 창문 빛 번짐 */}
+      <group position={[-0.75, 1.2, 1.2]}>
+        <Glow color="#ffd98a" size={1.5} opacity={0.55} pulse={0.5} />
+      </group>
+      <group position={[0.75, 1.2, 1.2]}>
+        <Glow color="#ffd98a" size={1.5} opacity={0.55} pulse={0.5} />
+      </group>
       {/* 작은 굴뚝 */}
       <mesh position={[0.7, 2.7, 0]} castShadow>
         <boxGeometry args={[0.3, 0.7, 0.3]} />

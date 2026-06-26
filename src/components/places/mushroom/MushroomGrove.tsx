@@ -4,6 +4,7 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Points, BufferGeometry, Float32BufferAttribute } from "three";
 import { getToonGradient } from "@/components/character/toonGradient";
+import { Glow } from "@/components/scenery/Glow";
 import { waypointX, WAYPOINTS } from "@/components/world/journeyPath";
 import { journeyStore } from "@/components/world/journeyStore";
 import { discoveryStore } from "@/components/world/discoveryStore";
@@ -126,7 +127,10 @@ function Mushroom({
         <sphereGeometry args={[0.05, 8, 8]} />
         <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.5} />
       </mesh>
-      {/* 점광원은 큰 버섯에만(성능) — 작은 버섯은 발광으로만 빛남 */}
+      {/* 빛 번짐 (모든 버섯) + 큰 버섯엔 점광원 */}
+      <group position={[0, 0.72, 0]}>
+        <Glow color={glow} size={clickable ? 2.4 : 1.3} opacity={clickable ? 0.7 : 0.45} pulse={clickable ? 1.0 : 0.6} />
+      </group>
       {clickable && (
         <pointLight position={[0, 0.8, 0]} color={glow} intensity={6} distance={5} decay={2} />
       )}

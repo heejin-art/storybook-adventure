@@ -32,10 +32,15 @@ export function PlaceholderModel() {
   const legFR = useRef<Mesh>(null);
   const legBL = useRef<Mesh>(null);
   const legBR = useRef<Mesh>(null);
+  const eyeL = useRef<Mesh>(null);
+  const eyeR = useRef<Mesh>(null);
 
   const t = useRef(0);
   const beatT = useRef(0);
   const prevBeat = useRef<BehaviorBeat>("none");
+  const moveSmooth = useRef(0); // 0~1, 이동 정도(정지 시 부드럽게 0으로)
+  const blinkT = useRef(0);
+  const nextBlink = useRef(2.5);
 
   useFrame((_, delta) => {
     const s = characterStore.read();
@@ -52,21 +57,43 @@ export function PlaceholderModel() {
     const gait = s.locomotion === "run" ? 13 : 8.5;
     const speed = isMoving && !isSitting ? gait * (0.6 + s.intensity * 0.8) : 0;
 
+    // 이동 정도를 부드럽게(정지 시 다리가 스르르 멈춤)
+    const moveTarget = isMoving && !isSitting ? 1 : 0;
+    moveSmooth.current += (moveTarget - moveSmooth.current) * Math.min(1, delta * 8);
+    const move = moveSmooth.current;
+
     // ── 다리: 측면에서 앞뒤로 스윙(Z축 회전) ──
     const swing = Math.sin(time * speed) * (s.locomotion === "run" ? 0.7 : 0.5);
-    const move = isMoving && !isSitting ? 1 : 0;
     if (legFL.current) legFL.current.rotation.z = swing * move;
     if (legBL.current) legBL.current.rotation.z = -swing * move;
     if (legFR.current) legFR.current.rotation.z = -swing * move;
     if (legBR.current) legBR.current.rotation.z = swing * move;
 
-    // ── 몸통: 걸을 때 바운스, 멈추면 숨쉬기 ──
+    // ── 몸통: 걸을 때 바운스+스쿼시, 멈추면 숨쉬기 ──
     if (body.current) {
-      const bob = isMoving
-        ? Math.abs(Math.sin(time * speed)) * 0.05
-        : Math.sin(time * 1.5) * 0.018;
-      body.current.position.y = bob;
+      const stepBounce = Math.abs(Math.sin(time * speed)) * 0.05 * move;
+      const breathe = Math.sin(time * 1.5) * 0.018 * (1 - move);
+      body.current.position.y = stepBounce + breathe;
+      // 발 닿을 때 살짝 눌리는 스쿼시(생동감)
+      const squash = 1 - Math.abs(Math.cos(time * speed)) * 0.05 * move;
+      body.current.scale.y = squash;
+      body.current.scale.x = 1 + (1 - squash) * 0.6;
     }
+
+    // ── 눈 깜빡임 ──
+    blinkT.current += delta;
+    let eyeScaleY = 1;
+    if (blinkT.current > nextBlink.current) {
+      const into = blinkT.current - nextBlink.current;
+      if (into < 0.12) {
+        eyeScaleY = 1 - Math.sin((into / 0.12) * Math.PI) * 0.9; // 감았다 뜨기
+      } else {
+        blinkT.current = 0;
+        nextBlink.current = 2 + Math.abs(Math.sin(time * 9.3)) * 4; // 다음 깜빡임까지
+      }
+    }
+    if (eyeL.current) eyeL.current.scale.y = eyeScaleY;
+    if (eyeR.current) eyeR.current.scale.y = eyeScaleY;
 
     // ── 머리: 시선(gaze) + idle 잔잔한 흔들림 ──
     if (head.current) {
@@ -126,9 +153,11 @@ export function PlaceholderModel() {
       sitDrop + hop,
       0.18,
     );
+    // 멈췄을 때 살짝 무게중심 이동(살아있는 느낌)
+    const idleSway = isSitting ? 0 : Math.sin(time * 0.7) * 0.025 * (1 - move);
     root.current.rotation.z = MathUtils.lerp(
       root.current.rotation.z,
-      sitTilt,
+      sitTilt + idleSway,
       0.12,
     );
     root.current.rotation.y = MathUtils.lerp(
@@ -180,12 +209,12 @@ export function PlaceholderModel() {
             </mesh>
           </group>
 
-          {/* 눈 (측면이라 카메라쪽 한 개가 주로 보임) */}
-          <mesh position={[0.22, 0.06, 0.2]}>
+          {/* 눈 (측면이라 카메라쪽 한 개가 주로 보임) — 깜빡임 */}
+          <mesh ref={eyeL} position={[0.22, 0.06, 0.2]}>
             <sphereGeometry args={[0.055, 12, 12]} />
             <meshBasicMaterial color={NOSE} />
           </mesh>
-          <mesh position={[0.22, 0.06, -0.2]}>
+          <mesh ref={eyeR} position={[0.22, 0.06, -0.2]}>
             <sphereGeometry args={[0.055, 12, 12]} />
             <meshBasicMaterial color={NOSE} />
           </mesh>

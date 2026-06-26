@@ -11,6 +11,8 @@ import { Trees } from "@/components/scenery/Trees";
 import { Grass } from "@/components/scenery/Grass";
 import { Flowers } from "@/components/scenery/Flowers";
 import { Pollen } from "@/components/scenery/Pollen";
+import { Leaves } from "@/components/scenery/Leaves";
+import { SunGlow } from "@/components/scenery/SunGlow";
 import { Butterfly } from "@/components/scenery/Butterfly";
 import { HomePlace } from "@/components/places/home/HomePlace";
 import { CareerPath } from "@/components/places/forest/CareerPath";
@@ -27,13 +29,14 @@ export function WorldCanvas() {
   return (
     <div className="fixed inset-0 z-0">
       <Canvas
-        shadows
+        shadows="soft"
         dpr={[1, 1.8]}
         gl={{ antialias: true }}
         camera={{ position: [0, 1.75, 7.2], fov: 38, near: 0.1, far: 200 }}
       >
         <Atmosphere />
         <SkyGradient />
+        <SunGlow />
 
         <Suspense fallback={null}>
           {/* 원경 → 근경 풍경 (월드 고정, 카메라가 지나가며 패럴럭스) */}
@@ -53,8 +56,9 @@ export function WorldCanvas() {
           </JourneyRig>
           <BehaviorDirector />
 
-          {/* 공기 중 빛가루 */}
+          {/* 공기 중 빛가루 + 흩날리는 나뭇잎 */}
           <Pollen />
+          <Leaves />
         </Suspense>
       </Canvas>
     </div>

@@ -26,8 +26,9 @@ export function JourneyRig({ children }: { children: ReactNode }) {
   const lookAt = useRef(new Vector3());
   const smoothX = useRef(0); // 또또·카메라가 공유하는 부드러운 위치
 
-  useFrame(() => {
-    const { progress } = journeyStore.read();
+  useFrame((state) => {
+    const { progress, velocity } = journeyStore.read();
+    const t = state.clock.elapsedTime;
     const targetX = worldXAt(progress);
 
     // 진행도를 부드럽게 추적(하나의 값) → 또또와 카메라가 절대 어긋나지 않음
@@ -37,12 +38,28 @@ export function JourneyRig({ children }: { children: ReactNode }) {
     // 또또는 항상 이 위치(= 화면 중앙-왼쪽 고정)
     if (follow.current) follow.current.position.x = x;
 
-    // 카메라는 또또보다 AHEAD만큼 앞 → 진행방향(오른쪽)에 여백
-    camera.position.x = x + AHEAD;
-    camera.position.y = MathUtils.lerp(camera.position.y, CAM_HEIGHT, 0.06);
-    camera.position.z = MathUtils.lerp(camera.position.z, CAM_DIST, 0.06);
+    // 멈춤 호흡(아주 느린 부유) — 정적이지 않게
+    const breathY = Math.sin(t * 0.45) * 0.04;
+    const breathX = Math.sin(t * 0.27) * 0.05;
 
-    lookAt.current.set(camera.position.x, LOOK_Y, 0);
+    // 속도에 따라 더 앞을 보고(여행감) 카메라가 살짝 뒤로 빠짐(역동감)
+    const aheadDyn = AHEAD + velocity * 1.4;
+    const distDyn = CAM_DIST + velocity * 0.9;
+
+    camera.position.x = MathUtils.lerp(
+      camera.position.x,
+      x + aheadDyn + breathX,
+      0.1,
+    );
+    camera.position.y = MathUtils.lerp(camera.position.y, CAM_HEIGHT + breathY, 0.05);
+    camera.position.z = MathUtils.lerp(camera.position.z, distDyn, 0.04);
+
+    // 시선도 진행방향으로 살짝 끌리고, 미세하게 흔들려 살아있는 느낌
+    lookAt.current.set(
+      camera.position.x + velocity * 0.4,
+      LOOK_Y + Math.sin(t * 0.6) * 0.02,
+      0,
+    );
     camera.lookAt(lookAt.current);
   });
 

@@ -2,6 +2,7 @@
 
 import { useFrame } from "@react-three/fiber";
 import { getToonGradient } from "@/components/character/toonGradient";
+import { Glow } from "@/components/scenery/Glow";
 import {
   waypointX,
   careerNodeProgress,
@@ -70,6 +71,9 @@ function Lantern({ x, z }: { x: number; z: number }) {
           emissiveIntensity={1.4}
         />
       </mesh>
+      <group position={[0.24, 1.0, 0]}>
+        <Glow color="#ffc46a" size={1.6} opacity={0.6} pulse={0.8} />
+      </group>
       <pointLight
         position={[0.24, 1.0, 0]}
         color="#ffcf80"

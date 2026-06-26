@@ -2,7 +2,13 @@
 
 import { useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { Points, BufferGeometry, Float32BufferAttribute } from "three";
+import {
+  Points,
+  BufferGeometry,
+  Float32BufferAttribute,
+  AdditiveBlending,
+} from "three";
+import { getGlowTexture } from "./glowTexture";
 
 /**
  * 떠다니는 빛가루(꽃가루/홀씨) — 햇살 속을 부유하는 작은 입자들.
@@ -38,11 +44,13 @@ export function Pollen() {
   return (
     <points ref={ref} geometry={geometry} frustumCulled={false}>
       <pointsMaterial
-        size={0.06}
-        color="#fff6d8"
+        map={getGlowTexture()}
+        size={0.16}
+        color="#fff2cf"
         transparent
-        opacity={0.8}
+        opacity={0.7}
         depthWrite={false}
+        blending={AdditiveBlending}
         sizeAttenuation
       />
     </points>
