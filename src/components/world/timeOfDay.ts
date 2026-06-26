@@ -26,14 +26,14 @@ const STOPS: Stop[] = [
   {
     at: 0.0, // 작은 집 · 아침 (따뜻·평화)
     skyTop: "#bfe0f2", skyMid: "#dff0e4", skyBot: "#fbf0d8",
-    fog: "#d3e6cf", fogNear: 10, fogFar: 70,
-    sun: "#ffe9c4", sunI: 1.25, amb: "#fff4e2", ambI: 0.78,
+    fog: "#d6e8d2", fogNear: 8, fogFar: 52,
+    sun: "#ffe9c4", sunI: 1.3, amb: "#fff4e2", ambI: 0.76,
   },
   {
     at: 0.45, // 숲길 · 한낮 (맑고 푸름)
     skyTop: "#a9d4ef", skyMid: "#cfeada", skyBot: "#eef3d6",
-    fog: "#c2ddc1", fogNear: 10, fogFar: 72,
-    sun: "#fff0d0", sunI: 1.3, amb: "#fbf6e6", ambI: 0.8,
+    fog: "#c4dfc3", fogNear: 9, fogFar: 56,
+    sun: "#fff0d0", sunI: 1.35, amb: "#fbf6e6", ambI: 0.78,
   },
   {
     at: 0.7, // 버섯숲 입구 · 그늘 (서늘해짐)

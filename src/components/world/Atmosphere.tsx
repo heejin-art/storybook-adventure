@@ -69,8 +69,10 @@ export function Atmosphere() {
         shadow-camera-bottom={-20}
         shadow-bias={-0.0005}
       />
-      {/* 역광 림라이트 — 또또를 배경에서 떼어줌 */}
-      <directionalLight position={[-6, 5, -8]} intensity={0.4} color="#bfe3f0" />
+      {/* 역광 림라이트(차가운) — 또또·풍경을 배경에서 떼어내 입체감 */}
+      <directionalLight position={[-7, 6, -9]} intensity={0.6} color="#bfe3f0" />
+      {/* 앞쪽 약한 채움광(따뜻) — 그림자 너무 어둡지 않게 */}
+      <directionalLight position={[2, 3, 9]} intensity={0.25} color="#ffe7c8" />
     </>
   );
 }

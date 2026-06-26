@@ -34,6 +34,8 @@ export function PlaceholderModel() {
   const legBR = useRef<Mesh>(null);
   const eyeL = useRef<Mesh>(null);
   const eyeR = useRef<Mesh>(null);
+  const earL = useRef<Group>(null);
+  const earR = useRef<Group>(null);
 
   const t = useRef(0);
   const beatT = useRef(0);
@@ -41,6 +43,10 @@ export function PlaceholderModel() {
   const moveSmooth = useRef(0); // 0~1, 이동 정도(정지 시 부드럽게 0으로)
   const blinkT = useRef(0);
   const nextBlink = useRef(2.5);
+  // 가끔 두리번거림(idle glance)
+  const glanceT = useRef(0);
+  const nextGlance = useRef(3);
+  const glanceYaw = useRef(0);
 
   useFrame((_, delta) => {
     const s = characterStore.read();
@@ -95,23 +101,49 @@ export function PlaceholderModel() {
     if (eyeL.current) eyeL.current.scale.y = eyeScaleY;
     if (eyeR.current) eyeR.current.scale.y = eyeScaleY;
 
-    // ── 머리: 시선(gaze) + idle 잔잔한 흔들림 ──
+    // 가끔 두리번거림(idle glance) — 멈춰 있을 때 고개를 천천히 돌렸다 돌아옴
+    glanceT.current += delta;
+    if (s.behavior === "none" && !isMoving) {
+      if (glanceT.current > nextGlance.current) {
+        glanceYaw.current = Math.sin(time * 11.3) * 0.45;
+        if (glanceT.current > nextGlance.current + 1.7) {
+          glanceT.current = 0;
+          nextGlance.current = 3 + Math.abs(Math.sin(time * 7.7)) * 4.5;
+          glanceYaw.current = 0;
+        }
+      }
+    } else {
+      glanceYaw.current = 0;
+    }
+
+    // ── 머리: 시선(gaze) + idle 잔잔한 흔들림 + 두리번 ──
     if (head.current) {
       const idleYaw = !isMoving ? Math.sin(time * 0.8) * 0.06 : 0;
       const idlePitch = !isMoving ? Math.sin(time * 1.1) * 0.04 : 0;
-      // gazeYaw>0 → 카메라(+Z) 쪽으로 고개를 돌림(사용자 바라보기)
-      const targetYaw = s.gazeYaw * 0.9 + idleYaw;
+      const targetYaw = s.gazeYaw * 0.9 + idleYaw + glanceYaw.current;
       const targetPitch = -s.gazePitch * 0.7 + idlePitch;
       head.current.rotation.y = MathUtils.lerp(
         head.current.rotation.y,
         targetYaw,
-        0.12,
+        0.1,
       );
       head.current.rotation.x = MathUtils.lerp(
         head.current.rotation.x,
         targetPitch,
-        0.12,
+        0.1,
       );
+    }
+
+    // ── 귀: 걸을 때 펄럭, 멈추면 살랑, 달릴 때 뒤로 ──
+    if (earL.current && earR.current) {
+      const flap = Math.sin(time * speed) * 0.28 * move;
+      const idleEar = Math.sin(time * 1.4) * 0.06 * (1 - move);
+      const flopBack = -move * 0.18;
+      const zr = 0.18 + flap + idleEar;
+      earL.current.rotation.z = zr;
+      earR.current.rotation.z = zr;
+      earL.current.rotation.x = MathUtils.lerp(earL.current.rotation.x, flopBack, 0.1);
+      earR.current.rotation.x = MathUtils.lerp(earR.current.rotation.x, flopBack, 0.1);
     }
 
     // ── 킁킁(sniff): 코를 들썩 ──
@@ -132,6 +164,8 @@ export function PlaceholderModel() {
       const wagSpeed = s.behavior === "greet" ? 17 : excited ? 11 : 4;
       const wagAmp = s.behavior === "greet" ? 0.7 : 0.45;
       tail.current.rotation.y = Math.sin(time * wagSpeed) * wagAmp;
+      // 걸을 때 위아래로 따라 출렁(2차 모션, 약간의 지연)
+      tail.current.rotation.x = Math.sin(time * speed + 0.6) * 0.2 * move;
     }
 
     if (!root.current) return;
@@ -192,9 +226,19 @@ export function PlaceholderModel() {
           <Puff p={[0, 0.28, 0]} r={0.24} m={fur} />
           <Puff p={[-0.18, 0.18, 0.22]} r={0.18} m={fur} />
           <Puff p={[-0.18, 0.18, -0.22]} r={0.18} m={fur} />
-          {/* 귀 (양옆 복슬) */}
-          <Puff p={[-0.05, 0.02, 0.36]} r={0.17} m={furShade} />
-          <Puff p={[-0.05, 0.02, -0.36]} r={0.17} m={furShade} />
+          {/* 귀 (양옆 복슬) — 위쪽 관절에서 흔들림 */}
+          <group ref={earL} position={[-0.05, 0.14, 0.36]}>
+            <mesh position={[0, -0.14, 0]} castShadow>
+              <sphereGeometry args={[0.17, 14, 14]} />
+              <meshToonMaterial color={FLUFF_SHADE} gradientMap={grad} />
+            </mesh>
+          </group>
+          <group ref={earR} position={[-0.05, 0.14, -0.36]}>
+            <mesh position={[0, -0.14, 0]} castShadow>
+              <sphereGeometry args={[0.17, 14, 14]} />
+              <meshToonMaterial color={FLUFF_SHADE} gradientMap={grad} />
+            </mesh>
+          </group>
 
           {/* 주둥이 (+X) — 킁킁 시 들썩 */}
           <group ref={snout} position={[0.3, -0.14, 0]}>

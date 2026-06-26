@@ -10,6 +10,7 @@ import { Hills } from "@/components/scenery/Hills";
 import { Trees } from "@/components/scenery/Trees";
 import { Grass } from "@/components/scenery/Grass";
 import { Flowers } from "@/components/scenery/Flowers";
+import { Rocks } from "@/components/scenery/Rocks";
 import { Pollen } from "@/components/scenery/Pollen";
 import { Leaves } from "@/components/scenery/Leaves";
 import { SunGlow } from "@/components/scenery/SunGlow";
@@ -45,6 +46,7 @@ export function WorldCanvas() {
           <Trees />
           <Grass />
           <Flowers />
+          <Rocks />
           <HomePlace />
           <CareerPath />
           <MushroomGrove />

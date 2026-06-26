@@ -25,11 +25,18 @@ export function JourneyRig({ children }: { children: ReactNode }) {
   const { camera } = useThree();
   const lookAt = useRef(new Vector3());
   const smoothX = useRef(0); // 또또·카메라가 공유하는 부드러운 위치
+  const introT = useRef(0); // 시네마틱 인트로 타이머
+  const roll = useRef(0);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const { progress, velocity } = journeyStore.read();
     const t = state.clock.elapsedTime;
     const targetX = worldXAt(progress);
+
+    // 시네마틱 인트로: 처음 ~3.5초 동안 멀리·위에서 천천히 밀려들어옴
+    introT.current = Math.min(introT.current + delta, 4);
+    const introRaw = 1 - Math.min(introT.current / 3.5, 1);
+    const intro = introRaw * introRaw * (3 - 2 * introRaw); // smoothstep
 
     // 진행도를 부드럽게 추적(하나의 값) → 또또와 카메라가 절대 어긋나지 않음
     smoothX.current = MathUtils.lerp(smoothX.current, targetX, 0.12);
@@ -51,8 +58,16 @@ export function JourneyRig({ children }: { children: ReactNode }) {
       x + aheadDyn + breathX,
       0.1,
     );
-    camera.position.y = MathUtils.lerp(camera.position.y, CAM_HEIGHT + breathY, 0.05);
-    camera.position.z = MathUtils.lerp(camera.position.z, distDyn, 0.04);
+    camera.position.y = MathUtils.lerp(
+      camera.position.y,
+      CAM_HEIGHT + breathY + intro * 1.4,
+      0.05,
+    );
+    camera.position.z = MathUtils.lerp(
+      camera.position.z,
+      distDyn + intro * 3.2,
+      0.04,
+    );
 
     // 시선도 진행방향으로 살짝 끌리고, 미세하게 흔들려 살아있는 느낌
     lookAt.current.set(
@@ -61,6 +76,11 @@ export function JourneyRig({ children }: { children: ReactNode }) {
       0,
     );
     camera.lookAt(lookAt.current);
+
+    // 미세한 카메라 롤(속도 + 느린 호흡) — 시네마틱
+    const rollTarget = velocity * 0.03 + Math.sin(t * 0.23) * 0.006;
+    roll.current = MathUtils.lerp(roll.current, rollTarget, 0.05);
+    camera.rotation.z += roll.current;
   });
 
   return <group ref={follow}>{children}</group>;
