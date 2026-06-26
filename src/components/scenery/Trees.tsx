@@ -65,14 +65,14 @@ function buildTrees(): TreeData[] {
   const trees: TreeData[] = [];
   let id = 0;
   // 길 뒤쪽 숲
-  for (let i = 0; i < 30; i++, id++) {
+  for (let i = 0; i < 50; i++, id++) {
     const x = seeded(id, 1) * (JOURNEY_LENGTH + 12) - 5;
     const z = -3 - seeded(id, 2) * 8;
     const scale = 0.75 + seeded(id, 3) * 1.0;
     trees.push(buildTree(id, x, z, scale));
   }
   // 앞쪽(전경) 큰 나무 — 깊이 프레이밍
-  for (let i = 0; i < 6; i++, id++) {
+  for (let i = 0; i < 10; i++, id++) {
     const x = 8 + seeded(id, 7) * (JOURNEY_LENGTH - 16);
     const z = 3.2 + seeded(id, 8) * 2.4;
     const scale = 1.3 + seeded(id, 9) * 0.9;

@@ -18,7 +18,7 @@ export function Rocks() {
   const grad = getToonGradient();
   const rocks = useMemo(
     () =>
-      Array.from({ length: 18 }, (_, i) => ({
+      Array.from({ length: 28 }, (_, i) => ({
         x: seeded(i, 1) * JOURNEY_LENGTH,
         z: -2.5 + seeded(i, 2) * 5,
         s: 0.2 + seeded(i, 3) * 0.4,

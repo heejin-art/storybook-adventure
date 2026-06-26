@@ -21,37 +21,49 @@ interface Stop extends Palette {
   at: number;
 }
 
-// progress 기준 키프레임 (사이는 선형 보간)
+// progress 기준 키프레임 (사이는 선형 보간) — 아침→한낮→버섯숲→노을→저녁→밤→여명
 const STOPS: Stop[] = [
   {
     at: 0.0, // 작은 집 · 아침 (따뜻·평화)
     skyTop: "#bfe0f2", skyMid: "#dff0e4", skyBot: "#fbf0d8",
-    fog: "#d6e8d2", fogNear: 8, fogFar: 52,
+    fog: "#d6e8d2", fogNear: 8, fogFar: 60,
     sun: "#ffe9c4", sunI: 1.3, amb: "#fff4e2", ambI: 0.76,
   },
   {
-    at: 0.45, // 숲길 · 한낮 (맑고 푸름)
+    at: 0.35, // 숲길 · 한낮 (맑고 푸름)
     skyTop: "#a9d4ef", skyMid: "#cfeada", skyBot: "#eef3d6",
-    fog: "#c4dfc3", fogNear: 9, fogFar: 56,
+    fog: "#c4dfc3", fogNear: 9, fogFar: 64,
     sun: "#fff0d0", sunI: 1.35, amb: "#fbf6e6", ambI: 0.78,
   },
   {
-    at: 0.7, // 버섯숲 입구 · 그늘 (서늘해짐)
-    skyTop: "#8fb6c4", skyMid: "#a8c6bd", skyBot: "#c3d2b6",
-    fog: "#9fbcb0", fogNear: 7, fogFar: 50,
-    sun: "#d6e6ec", sunI: 0.8, amb: "#d3e2e0", ambI: 0.62,
+    at: 0.52, // 버섯숲 · 신비 (서늘·푸른 안개)
+    skyTop: "#7c9aa8", skyMid: "#93acab", skyBot: "#aebf9e",
+    fog: "#86a098", fogNear: 5, fogFar: 42,
+    sun: "#bcd6e0", sunI: 0.66, amb: "#aec6c6", ambI: 0.58,
   },
   {
-    at: 0.92, // 버섯숲 깊은 곳 · 신비 (푸른 안개)
-    skyTop: "#6f93a6", skyMid: "#86a3a6", skyBot: "#9fb29a",
-    fog: "#7f9c97", fogNear: 5, fogFar: 40,
-    sun: "#bcd6e0", sunI: 0.62, amb: "#aec6c6", ambI: 0.58,
+    at: 0.65, // 풍선언덕 · 노을 (따뜻한 주황·분홍)
+    skyTop: "#f4a98c", skyMid: "#f8c79a", skyBot: "#ffe3b4",
+    fog: "#eab89a", fogNear: 8, fogFar: 60,
+    sun: "#ff9e63", sunI: 1.0, amb: "#ffd6ad", ambI: 0.7,
   },
   {
-    at: 1.0,
-    skyTop: "#6f93a6", skyMid: "#86a3a6", skyBot: "#9fb29a",
-    fog: "#7f9c97", fogNear: 5, fogFar: 40,
-    sun: "#bcd6e0", sunI: 0.62, amb: "#aec6c6", ambI: 0.58,
+    at: 0.77, // 강·다리 · 초저녁 (잔잔한 보랏빛)
+    skyTop: "#5d6a9c", skyMid: "#8a86ad", skyBot: "#c7a9b4",
+    fog: "#7c80a6", fogNear: 6, fogFar: 48,
+    sun: "#b9b6e6", sunI: 0.55, amb: "#9aa0c4", ambI: 0.56,
+  },
+  {
+    at: 0.88, // 별언덕 · 밤 (깊은 파랑)
+    skyTop: "#161d38", skyMid: "#27315a", skyBot: "#3c4670",
+    fog: "#27305a", fogNear: 4, fogFar: 40,
+    sun: "#aebce8", sunI: 0.35, amb: "#5a6488", ambI: 0.5,
+  },
+  {
+    at: 1.0, // 귀환 · 깊은 밤/여명 (집의 온기)
+    skyTop: "#232c4c", skyMid: "#3e4468", skyBot: "#79667e",
+    fog: "#363c5c", fogNear: 4, fogFar: 44,
+    sun: "#c6c0e0", sunI: 0.42, amb: "#6b6c92", ambI: 0.52,
   },
 ];
 

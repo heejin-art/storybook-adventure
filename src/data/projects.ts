@@ -14,6 +14,18 @@ export interface Project {
   stack: string[];
 }
 
+export const todaypop: Project = {
+  id: "todaypop",
+  emoji: "🎈",
+  title: "오늘뽁",
+  tagline: "오늘 하루를 톡 터뜨리는 작은 즐거움",
+  problem: "반복되는 일상 속에서 ‘오늘만의 설렘’을 놓치는 사람들.",
+  solution:
+    "매일 하나씩 풍선처럼 떠오르는 작은 미션·기록으로 하루에 포인트를 만드는 서비스.",
+  result: "가벼운 참여가 꾸준한 습관으로. 매일 다시 찾는 즐거움.",
+  stack: ["서비스 기획", "Product Design", "그로스"],
+};
+
 export const notalk: Project = {
   id: "notalk",
   emoji: "🍄",

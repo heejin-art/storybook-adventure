@@ -38,7 +38,7 @@ function build(i: number, x: number, z: number, scale: number): FlowerData {
 function buildFlowers(): FlowerData[] {
   const out: FlowerData[] = [];
   let id = 0;
-  for (let i = 0; i < 55; i++, id++) {
+  for (let i = 0; i < 85; i++, id++) {
     out.push(build(id, seeded(id, 1) * JOURNEY_LENGTH, -2 + seeded(id, 2) * 4, 0.7 + seeded(id, 3) * 0.7));
   }
   const cx = waypointX(WAYPOINTS.flower);

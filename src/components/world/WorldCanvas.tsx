@@ -14,10 +14,16 @@ import { Rocks } from "@/components/scenery/Rocks";
 import { Pollen } from "@/components/scenery/Pollen";
 import { Leaves } from "@/components/scenery/Leaves";
 import { SunGlow } from "@/components/scenery/SunGlow";
+import { Stars } from "@/components/scenery/Stars";
+import { Fireflies } from "@/components/scenery/Fireflies";
 import { Butterfly } from "@/components/scenery/Butterfly";
 import { HomePlace } from "@/components/places/home/HomePlace";
 import { CareerPath } from "@/components/places/forest/CareerPath";
 import { MushroomGrove } from "@/components/places/mushroom/MushroomGrove";
+import { BalloonHill } from "@/components/places/balloon/BalloonHill";
+import { RiverBridge } from "@/components/places/river/RiverBridge";
+import { StarHill } from "@/components/places/star/StarHill";
+import { EndingHome } from "@/components/places/ending/EndingHome";
 import { Totto } from "@/components/character/Totto";
 import { BehaviorDirector } from "@/components/character/BehaviorDirector";
 
@@ -50,6 +56,10 @@ export function WorldCanvas() {
           <HomePlace />
           <CareerPath />
           <MushroomGrove />
+          <BalloonHill />
+          <RiverBridge />
+          <StarHill />
+          <EndingHome />
           <Butterfly />
 
           {/* 또또 + 가이드 행동 (카메라가 따라가는 중심) */}
@@ -58,9 +68,11 @@ export function WorldCanvas() {
           </JourneyRig>
           <BehaviorDirector />
 
-          {/* 공기 중 빛가루 + 흩날리는 나뭇잎 */}
+          {/* 공기 중 빛가루 + 흩날리는 나뭇잎 + 밤하늘 별 + 반딧불이 */}
           <Pollen />
           <Leaves />
+          <Stars />
+          <Fireflies />
         </Suspense>
       </Canvas>
     </div>

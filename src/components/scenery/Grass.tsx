@@ -25,7 +25,7 @@ function seeded(i: number, s: number) {
   return x - Math.floor(x);
 }
 
-const COUNT = 4200;
+const COUNT = 6800;
 const BLADE_H = 0.5;
 const BASE = new Color("#5f9450");
 const TIP = new Color("#b6d886");

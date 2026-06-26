@@ -35,8 +35,16 @@ export function BehaviorDirector() {
     const nearButterfly =
       Math.abs(progress - WAYPOINTS.butterfly) < 0.06 && butterflyState.visible;
     const nearMushroom = Math.abs(progress - WAYPOINTS.mushroom) < 0.07;
+    const nearRiver = Math.abs(progress - WAYPOINTS.river) < 0.05;
+    const nearStar = Math.abs(progress - WAYPOINTS.star) < 0.05;
 
-    if (nearMushroom && slow) {
+    if (nearRiver && slow) {
+      // 🌊 강 앞에서 앉아 물을 바라봄
+      characterStore.setBehavior("sit", 0.05, -0.25);
+    } else if (nearStar && slow) {
+      // ⭐ 사용자를 한 번 돌아봄
+      characterStore.setBehavior("lookBack", 0.7, 0.1);
+    } else if (nearMushroom && slow) {
       // 🍄 버섯 냄새 킁킁 (고개 숙이고 코 들썩)
       characterStore.setBehavior("sniff", 0.1, -0.5);
     } else if (nearButterfly && slow) {
