@@ -26,7 +26,7 @@ export default function Home() {
       <AtmosphereOverlay />
       <StartHint />
       <DiscoveryOverlay />
-      <ScrollController heightVh={700} />
+      <ScrollController heightVh={1100} />
     </>
   );
 }

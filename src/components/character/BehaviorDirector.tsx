@@ -34,8 +34,12 @@ export function BehaviorDirector() {
     const nearFlower = Math.abs(progress - WAYPOINTS.flower) < 0.035;
     const nearButterfly =
       Math.abs(progress - WAYPOINTS.butterfly) < 0.06 && butterflyState.visible;
+    const nearMushroom = Math.abs(progress - WAYPOINTS.mushroom) < 0.07;
 
-    if (nearButterfly && slow) {
+    if (nearMushroom && slow) {
+      // 🍄 버섯 냄새 킁킁 (고개 숙이고 코 들썩)
+      characterStore.setBehavior("sniff", 0.1, -0.5);
+    } else if (nearButterfly && slow) {
       // 나비를 향한 시선 계산 (또또 머리 기준)
       const tottoX = worldXAt(progress);
       const dx = butterflyState.x - (tottoX + HEAD.x);

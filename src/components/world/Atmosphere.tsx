@@ -2,44 +2,57 @@
 
 import { useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { DirectionalLight, Color, Fog } from "three";
+import { DirectionalLight, AmbientLight, Color, Fog } from "three";
 import { journeyStore } from "./journeyStore";
+import { paletteAt } from "./timeOfDay";
 
 /**
  * 분위기 리그 — 조명 + 안개(시간대).
  * --------------------------------------------------
- * 1단계는 "아침 숲"의 따뜻하고 평화로운 톤. 진행도에 따라 살짝 더 환해지는 정도로 보간.
- * (이후 단계에서 아침→오후→노을→밤→여명 전체 아크로 확장.)
+ * 진행도에 따라 아침 숲(따뜻·평화) → 버섯숲(서늘·신비)으로 색·빛·안개가 연속 보간된다.
  * 안개로 깊이감과 장소 전환을 부드럽게 감춘다.
  */
-
-// 아침 팔레트
-const FOG_NEAR = new Color("#dcebd6");
-const FOG_FAR = new Color("#c6dcc4");
+const tmp = new Color();
 
 export function Atmosphere() {
   const sun = useRef<DirectionalLight>(null);
+  const amb = useRef<AmbientLight>(null);
   const { scene, camera } = useThree();
 
-  // 안개를 카메라가 보는 깊이에 맞춰 한 번 세팅
   if (!scene.fog) {
-    scene.fog = new Fog(FOG_FAR.getHex(), 10, 70);
-    scene.background = new Color("#e7f1de");
+    const pal = paletteAt(0);
+    scene.fog = new Fog(new Color(pal.fog).getHex(), pal.fogNear, pal.fogFar);
+    scene.background = new Color(pal.skyBot);
   }
 
   useFrame(() => {
     const { progress } = journeyStore.read();
-    // 진행에 따라 해가 살짝 높아지고 밝아지는 정도(아침 한정)
+    const pal = paletteAt(progress);
+
+    // 안개 색/거리 보간
+    const fog = scene.fog as Fog;
+    fog.color.lerp(tmp.set(pal.fog), 0.04);
+    fog.near += (pal.fogNear - fog.near) * 0.04;
+    fog.far += (pal.fogFar - fog.far) * 0.04;
+    (scene.background as Color)?.lerp?.(tmp.set(pal.skyBot), 0.04);
+
+    // 해: 위치는 카메라를 따라가고, 색·강도는 시간대 보간
     if (sun.current) {
       sun.current.position.set(camera.position.x + 8, 12 + progress * 3, 6);
       sun.current.target.position.set(camera.position.x, 0, 0);
       sun.current.target.updateMatrixWorld();
+      sun.current.color.lerp(tmp.set(pal.sun), 0.04);
+      sun.current.intensity += (pal.sunI - sun.current.intensity) * 0.04;
+    }
+    if (amb.current) {
+      amb.current.color.lerp(tmp.set(pal.amb), 0.04);
+      amb.current.intensity += (pal.ambI - amb.current.intensity) * 0.04;
     }
   });
 
   return (
     <>
-      <ambientLight intensity={0.75} color="#fff4e2" />
+      <ambientLight ref={amb} intensity={0.78} color="#fff4e2" />
       <hemisphereLight args={["#fdf6e3", "#a9cf9f", 0.7]} />
       <directionalLight
         ref={sun}
@@ -56,7 +69,7 @@ export function Atmosphere() {
         shadow-camera-bottom={-20}
         shadow-bias={-0.0005}
       />
-      {/* 역광 림라이트(차가운 하늘색) — 또또를 배경에서 떼어줌 */}
+      {/* 역광 림라이트 — 또또를 배경에서 떼어줌 */}
       <directionalLight position={[-6, 5, -8]} intensity={0.4} color="#bfe3f0" />
     </>
   );

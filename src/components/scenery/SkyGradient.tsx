@@ -3,32 +3,29 @@
 import { useRef, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { BackSide, Color, Mesh, ShaderMaterial } from "three";
+import { journeyStore } from "@/components/world/journeyStore";
+import { paletteAt } from "@/components/world/timeOfDay";
 
 /**
  * 페인터리 그라데이션 하늘 — 큰 돔(BackSide)에 셰이더 그라데이션.
  * 단색 배경이 아니라 위→지평선으로 부드럽게 물드는 감성 하늘.
- * 카메라를 따라다녀 항상 배경에 머문다. 외부 텍스처 없음(셰이더 생성).
+ * 진행도(시간대)에 따라 색이 연속 보간된다. 카메라를 따라다녀 항상 배경에 머문다.
  */
-export function SkyGradient({
-  top = "#bfe0f2",
-  middle = "#dff0e4",
-  bottom = "#fbf0d8",
-}: {
-  top?: string;
-  middle?: string;
-  bottom?: string;
-}) {
+const tmp = new Color();
+
+export function SkyGradient() {
   const mesh = useRef<Mesh>(null);
   const { camera } = useThree();
 
   const material = useMemo(() => {
+    const pal = paletteAt(0);
     return new ShaderMaterial({
       side: BackSide,
       depthWrite: false,
       uniforms: {
-        topColor: { value: new Color(top) },
-        midColor: { value: new Color(middle) },
-        botColor: { value: new Color(bottom) },
+        topColor: { value: new Color(pal.skyTop) },
+        midColor: { value: new Color(pal.skyMid) },
+        botColor: { value: new Color(pal.skyBot) },
       },
       vertexShader: /* glsl */ `
         varying vec3 vPos;
@@ -50,10 +47,17 @@ export function SkyGradient({
         }
       `,
     });
-  }, [top, middle, bottom]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useFrame(() => {
     if (mesh.current) mesh.current.position.copy(camera.position);
+    // 시간대 색 보간
+    const pal = paletteAt(journeyStore.read().progress);
+    const u = material.uniforms;
+    (u.topColor.value as Color).lerp(tmp.set(pal.skyTop), 0.04);
+    (u.midColor.value as Color).lerp(tmp.set(pal.skyMid), 0.04);
+    (u.botColor.value as Color).lerp(tmp.set(pal.skyBot), 0.04);
   });
 
   return (

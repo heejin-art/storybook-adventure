@@ -18,11 +18,20 @@ export function worldXAt(progress: number): number {
 
 /** 1단계에서 사용할 주요 지점들(progress 기준) */
 export const WAYPOINTS = {
-  home: 0.1, // 작은 집 (출발점보다 살짝 앞 → 다가가며 About 발견)
-  flower: 0.24, // 🌼 꽃밭 (또또가 멈춰 바라봄)
-  butterfly: 0.36, // 🦋 나비 출몰 구간
-  forestRest: 0.5, // 숲 입구 휴식 지점 (1단계 끝)
+  home: 0.08, // 작은 집 (출발점보다 살짝 앞 → 다가가며 About 발견)
+  flower: 0.17, // 🌼 꽃밭 (또또가 멈춰 바라봄)
+  butterfly: 0.26, // 🦋 나비 출몰 구간
+  careerStart: 0.4, // 숲길 시작 (Career)
+  careerEnd: 0.64, // 숲길 끝
+  mushroom: 0.84, // 🍄 버섯숲 (NOTALK)
 } as const;
+
+/** Career 노드 progress (start~end 사이 균등 배치) */
+export function careerNodeProgress(index: number, total: number): number {
+  const { careerStart, careerEnd } = WAYPOINTS;
+  if (total <= 1) return (careerStart + careerEnd) / 2;
+  return careerStart + ((careerEnd - careerStart) * index) / (total - 1);
+}
 
 /** 어떤 지점의 월드 X */
 export function waypointX(p: number): number {

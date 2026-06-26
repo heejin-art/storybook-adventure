@@ -13,6 +13,8 @@ import { Flowers } from "@/components/scenery/Flowers";
 import { Pollen } from "@/components/scenery/Pollen";
 import { Butterfly } from "@/components/scenery/Butterfly";
 import { HomePlace } from "@/components/places/home/HomePlace";
+import { CareerPath } from "@/components/places/forest/CareerPath";
+import { MushroomGrove } from "@/components/places/mushroom/MushroomGrove";
 import { Totto } from "@/components/character/Totto";
 import { BehaviorDirector } from "@/components/character/BehaviorDirector";
 
@@ -41,6 +43,8 @@ export function WorldCanvas() {
           <Grass />
           <Flowers />
           <HomePlace />
+          <CareerPath />
+          <MushroomGrove />
           <Butterfly />
 
           {/* 또또 + 가이드 행동 (카메라가 따라가는 중심) */}
