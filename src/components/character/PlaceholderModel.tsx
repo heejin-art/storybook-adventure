@@ -282,31 +282,24 @@ export function PlaceholderModel() {
           {/* 눈 — 얼굴 정면(+X), 코 기준 좌우 대칭, 중앙보다 아래.
               작게(자연스러운 비숑 비율) + 반짝임 + 깜빡임(그룹 scale.y).
               코[~0.5,-0.12,0]와 두 눈이 삼각형을 이룸. */}
-          <group ref={eyeL} position={[0.38, 0.02, 0.15]}>
+          {/* 표면에 납작하게 걸치도록(scale.x로 눌러 공처럼 돌출 X), 작게 */}
+          <group ref={eyeL} position={[0.375, 0.02, 0.15]} scale={[0.6, 1, 1]}>
             <mesh>
-              <sphereGeometry args={[0.05, 16, 16]} />
-              <meshStandardMaterial color="#2c2722" roughness={0.2} />
+              <sphereGeometry args={[0.038, 16, 16]} />
+              <meshStandardMaterial color="#2c2722" roughness={0.25} />
             </mesh>
-            <mesh position={[0.035, 0.022, 0.012]}>
-              <sphereGeometry args={[0.017, 8, 8]} />
-              <meshBasicMaterial color="#ffffff" />
-            </mesh>
-            <mesh position={[0.028, -0.018, -0.012]}>
-              <sphereGeometry args={[0.009, 8, 8]} />
+            <mesh position={[0.05, 0.016, 0.012]}>
+              <sphereGeometry args={[0.012, 8, 8]} />
               <meshBasicMaterial color="#ffffff" />
             </mesh>
           </group>
-          <group ref={eyeR} position={[0.38, 0.02, -0.15]}>
+          <group ref={eyeR} position={[0.375, 0.02, -0.15]} scale={[0.6, 1, 1]}>
             <mesh>
-              <sphereGeometry args={[0.05, 16, 16]} />
-              <meshStandardMaterial color="#2c2722" roughness={0.2} />
+              <sphereGeometry args={[0.038, 16, 16]} />
+              <meshStandardMaterial color="#2c2722" roughness={0.25} />
             </mesh>
-            <mesh position={[0.035, 0.022, -0.012]}>
-              <sphereGeometry args={[0.017, 8, 8]} />
-              <meshBasicMaterial color="#ffffff" />
-            </mesh>
-            <mesh position={[0.028, -0.018, 0.012]}>
-              <sphereGeometry args={[0.009, 8, 8]} />
+            <mesh position={[0.05, 0.016, -0.012]}>
+              <sphereGeometry args={[0.012, 8, 8]} />
               <meshBasicMaterial color="#ffffff" />
             </mesh>
           </group>
