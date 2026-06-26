@@ -31,22 +31,22 @@ export function Atmosphere() {
 
     // 안개 색/거리 보간
     const fog = scene.fog as Fog;
-    fog.color.lerp(tmp.set(pal.fog), 0.04);
-    fog.near += (pal.fogNear - fog.near) * 0.04;
-    fog.far += (pal.fogFar - fog.far) * 0.04;
-    (scene.background as Color)?.lerp?.(tmp.set(pal.skyBot), 0.04);
+    fog.color.lerp(tmp.set(pal.fog), 0.07);
+    fog.near += (pal.fogNear - fog.near) * 0.07;
+    fog.far += (pal.fogFar - fog.far) * 0.07;
+    (scene.background as Color)?.lerp?.(tmp.set(pal.skyBot), 0.07);
 
     // 해: 위치는 카메라를 따라가고, 색·강도는 시간대 보간
     if (sun.current) {
       sun.current.position.set(camera.position.x + 8, 12 + progress * 3, 6);
       sun.current.target.position.set(camera.position.x, 0, 0);
       sun.current.target.updateMatrixWorld();
-      sun.current.color.lerp(tmp.set(pal.sun), 0.04);
-      sun.current.intensity += (pal.sunI - sun.current.intensity) * 0.04;
+      sun.current.color.lerp(tmp.set(pal.sun), 0.07);
+      sun.current.intensity += (pal.sunI - sun.current.intensity) * 0.07;
     }
     if (amb.current) {
-      amb.current.color.lerp(tmp.set(pal.amb), 0.04);
-      amb.current.intensity += (pal.ambI - amb.current.intensity) * 0.04;
+      amb.current.color.lerp(tmp.set(pal.amb), 0.07);
+      amb.current.intensity += (pal.ambI - amb.current.intensity) * 0.07;
     }
   });
 

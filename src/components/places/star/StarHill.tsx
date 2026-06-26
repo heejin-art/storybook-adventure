@@ -38,7 +38,7 @@ export function StarHill() {
 
   useFrame(() => {
     const { progress } = journeyStore.read();
-    const near = Math.abs(progress - WAYPOINTS.star) < 0.06;
+    const near = Math.abs(progress - WAYPOINTS.star) < 0.045;
     if (near) discoveryStore.set("future");
     else if (discoveryStore.getSnapshot() === "future") discoveryStore.set(null);
 

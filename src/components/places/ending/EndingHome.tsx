@@ -16,7 +16,7 @@ export function EndingHome() {
 
   useFrame(() => {
     const { progress } = journeyStore.read();
-    const near = progress > WAYPOINTS.ending - 0.05;
+    const near = progress > WAYPOINTS.ending - 0.035;
     if (near) discoveryStore.set("ending");
     else if (discoveryStore.getSnapshot() === "ending") discoveryStore.set(null);
   });

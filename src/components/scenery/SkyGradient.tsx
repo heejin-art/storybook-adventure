@@ -55,9 +55,9 @@ export function SkyGradient() {
     // 시간대 색 보간
     const pal = paletteAt(journeyStore.read().progress);
     const u = material.uniforms;
-    (u.topColor.value as Color).lerp(tmp.set(pal.skyTop), 0.04);
-    (u.midColor.value as Color).lerp(tmp.set(pal.skyMid), 0.04);
-    (u.botColor.value as Color).lerp(tmp.set(pal.skyBot), 0.04);
+    (u.topColor.value as Color).lerp(tmp.set(pal.skyTop), 0.07);
+    (u.midColor.value as Color).lerp(tmp.set(pal.skyMid), 0.07);
+    (u.botColor.value as Color).lerp(tmp.set(pal.skyBot), 0.07);
   });
 
   return (
