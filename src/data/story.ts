@@ -35,5 +35,5 @@ export const ending = {
     "직접 만들고 실행하는 사람이야.",
     "다음엔 같이 새로운 서비스를 만들어보자.",
   ],
-  contact: "woohaha135@gmail.com",
+  contact: "zbxm2000@naver.com",
 } as const;
