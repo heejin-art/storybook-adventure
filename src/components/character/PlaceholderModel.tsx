@@ -279,43 +279,45 @@ export function PlaceholderModel() {
             </mesh>
           </group>
 
-          {/* 눈 — 머리 옆면(표면 밖)에 또렷이. 작은 점눈 + 반짝임 + 깜빡임(그룹 scale.y) */}
-          <group ref={eyeL} position={[0.2, 0.12, 0.37]}>
+          {/* 눈 — 얼굴 정면(+X), 코 기준 좌우 대칭, 중앙보다 아래.
+              작게(자연스러운 비숑 비율) + 반짝임 + 깜빡임(그룹 scale.y).
+              코[~0.5,-0.12,0]와 두 눈이 삼각형을 이룸. */}
+          <group ref={eyeL} position={[0.38, 0.02, 0.15]}>
             <mesh>
-              <sphereGeometry args={[0.07, 16, 16]} />
+              <sphereGeometry args={[0.05, 16, 16]} />
               <meshStandardMaterial color="#2c2722" roughness={0.2} />
             </mesh>
-            <mesh position={[0.02, 0.035, 0.05]}>
-              <sphereGeometry args={[0.024, 8, 8]} />
+            <mesh position={[0.035, 0.022, 0.012]}>
+              <sphereGeometry args={[0.017, 8, 8]} />
               <meshBasicMaterial color="#ffffff" />
             </mesh>
-            <mesh position={[-0.02, -0.03, 0.05]}>
-              <sphereGeometry args={[0.012, 8, 8]} />
+            <mesh position={[0.028, -0.018, -0.012]}>
+              <sphereGeometry args={[0.009, 8, 8]} />
               <meshBasicMaterial color="#ffffff" />
             </mesh>
           </group>
-          <group ref={eyeR} position={[0.2, 0.12, -0.37]}>
+          <group ref={eyeR} position={[0.38, 0.02, -0.15]}>
             <mesh>
-              <sphereGeometry args={[0.07, 16, 16]} />
+              <sphereGeometry args={[0.05, 16, 16]} />
               <meshStandardMaterial color="#2c2722" roughness={0.2} />
             </mesh>
-            <mesh position={[0.02, 0.035, -0.05]}>
-              <sphereGeometry args={[0.024, 8, 8]} />
+            <mesh position={[0.035, 0.022, -0.012]}>
+              <sphereGeometry args={[0.017, 8, 8]} />
               <meshBasicMaterial color="#ffffff" />
             </mesh>
-            <mesh position={[-0.02, -0.03, -0.05]}>
-              <sphereGeometry args={[0.012, 8, 8]} />
+            <mesh position={[0.028, -0.018, 0.012]}>
+              <sphereGeometry args={[0.009, 8, 8]} />
               <meshBasicMaterial color="#ffffff" />
             </mesh>
           </group>
-          {/* 볼터치(발그레) — 눈 아래 옆면 */}
-          <mesh position={[0.14, -0.04, 0.36]} scale={[0.45, 0.32, 0.3]}>
+          {/* 볼터치(발그레) — 눈 아래, 코 양옆 대칭 */}
+          <mesh position={[0.32, -0.1, 0.22]} scale={[0.34, 0.3, 0.42]}>
             <sphereGeometry args={[0.1, 10, 10]} />
-            <meshBasicMaterial color="#f4a6b6" transparent opacity={0.55} />
+            <meshBasicMaterial color="#f4a6b6" transparent opacity={0.5} />
           </mesh>
-          <mesh position={[0.14, -0.04, -0.36]} scale={[0.45, 0.32, 0.3]}>
+          <mesh position={[0.32, -0.1, -0.22]} scale={[0.34, 0.3, 0.42]}>
             <sphereGeometry args={[0.1, 10, 10]} />
-            <meshBasicMaterial color="#f4a6b6" transparent opacity={0.55} />
+            <meshBasicMaterial color="#f4a6b6" transparent opacity={0.5} />
           </mesh>
         </group>
 
