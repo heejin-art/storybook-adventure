@@ -396,13 +396,14 @@ export function PlaceholderModel() {
         break;
       }
       case "roll": {
-        // 척추(X축)를 축으로 한 바퀴 굴러 "데굴" — 중심 고정으로 땅 위에서 구른다.
-        const ang = (tt / 1.4) * Math.PI * 2;
-        targetXrot = ang;
-        targetY = PIVOT * (1 - Math.cos(ang));
-        targetZpos = -PIVOT * Math.sin(ang);
-        lerpXrot = 1;
-        lerpY = 1;
+        // "데굴데굴" — 척추(X축)로 좌→우 데굴거리며 구른다.
+        // 완전히 뒤집으면 머리(회전축보다 한참 위)가 땅을 뚫거나 공중으로 솟으므로,
+        // 뒤집히지 않는 범위로 좌우로 굴려 항상 땅 위에서 귀엽게.
+        const p = Math.min(tt / 1.4, 1);
+        targetXrot = Math.sin(p * Math.PI * 2) * 1.0; // 오른쪽으로 데굴 → 왼쪽으로 데굴
+        targetY = Math.abs(Math.sin(p * Math.PI * 4)) * 0.05; // 살짝 통통
+        legSet(0.55); // 다리 살짝 모으기
+        lerpXrot = 0.5;
         break;
       }
       case "shake": {
@@ -416,8 +417,12 @@ export function PlaceholderModel() {
         break;
     }
 
-    // ── 간식/물 먹기: 살짝 낮춰 그릇으로 (머리는 위에서 숙임) ──
-    if (s.feeding && !s.trick) targetY = -0.06;
+    // ── 간식/물 먹기: 몸을 낮추고 앞으로 숙여 그릇에 코를 박음 (머리는 위에서 추가로 숙임) ──
+    if (s.feeding && !s.trick) {
+      targetY = -0.12;
+      targetZ = -0.16; // 앞으로 기울여 코를 그릇으로
+      lerpZ = 0.18;
+    }
 
     // ── 엔딩: 스르륵 엎드려 새근새근 잠 ──
     if (s.sleeping) {

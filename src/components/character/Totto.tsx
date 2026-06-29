@@ -98,7 +98,7 @@ function FeedBowl() {
     if (treat.current) treat.current.visible = f === "treat";
     // 물 찰랑찰랑
     if (waterTop.current && f === "water") {
-      waterTop.current.position.y = 0.18 + Math.sin(state.clock.elapsedTime * 4) * 0.004;
+      waterTop.current.position.y = 0.24 + Math.sin(state.clock.elapsedTime * 4) * 0.005;
     }
   });
 
@@ -115,22 +115,36 @@ function FeedBowl() {
         <meshStandardMaterial color="#b06a40" roughness={0.7} />
       </mesh>
 
-      {/* 물그릇 — 파란 물이 그득히 (또렷하게) */}
+      {/* 물그릇 — 파란 물이 그득히 채워져 옆에서도 보이게(부피) */}
       <group ref={water}>
-        <mesh ref={waterTop} position={[0, 0.2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.3, 30]} />
+        {/* 물 덩어리(채워진 부피) */}
+        <mesh position={[0, 0.16, 0]}>
+          <cylinderGeometry args={[0.28, 0.2, 0.16, 24]} />
           <meshStandardMaterial
-            color="#4aa6e0"
+            color="#3f9fdc"
             emissive="#2a6fa0"
-            emissiveIntensity={0.25}
+            emissiveIntensity={0.3}
             transparent
-            opacity={0.95}
-            metalness={0.35}
+            opacity={0.92}
+            metalness={0.3}
             roughness={0.12}
           />
         </mesh>
+        {/* 수면(찰랑) */}
+        <mesh ref={waterTop} position={[0, 0.24, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[0.28, 30]} />
+          <meshStandardMaterial
+            color="#6cc2ee"
+            emissive="#3a86bd"
+            emissiveIntensity={0.25}
+            transparent
+            opacity={0.96}
+            metalness={0.4}
+            roughness={0.08}
+          />
+        </mesh>
         {/* 물빛 반사 */}
-        <mesh position={[0.08, 0.205, 0.05]} rotation={[-Math.PI / 2, 0, 0]}>
+        <mesh position={[0.08, 0.245, 0.05]} rotation={[-Math.PI / 2, 0, 0]}>
           <circleGeometry args={[0.06, 14]} />
           <meshBasicMaterial color="#ffffff" transparent opacity={0.6} />
         </mesh>

@@ -32,42 +32,38 @@ export function TrickBar() {
     "flex items-center gap-1.5 rounded-full border border-clay/40 bg-cream/95 px-3 py-1.5 font-display text-sm text-ink shadow-md transition-transform hover:-translate-y-0.5 hover:bg-white";
 
   return (
-    <div className="pointer-events-auto fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2">
-      {/* 간식 · 물 주기 */}
-      <div className="flex gap-2">
-        {FEEDS.map((f) => (
-          <button
-            key={f.name}
-            type="button"
-            onClick={() => {
-              resumeAudio();
-              characterStore.feed(f.name);
-            }}
-            className={btn}
-          >
-            <span className="text-base">{f.emoji}</span>
-            {f.label}
-          </button>
-        ))}
-      </div>
+    <div className="pointer-events-auto fixed bottom-6 right-6 z-40 grid grid-cols-2 gap-2">
+      {/* 간식 · 물 주기 — 묘기 버튼과 같은 그리드(동일 박스 크기) */}
+      {FEEDS.map((f) => (
+        <button
+          key={f.name}
+          type="button"
+          onClick={() => {
+            resumeAudio();
+            characterStore.feed(f.name);
+          }}
+          className={btn}
+        >
+          <span className="text-base">{f.emoji}</span>
+          {f.label}
+        </button>
+      ))}
 
       {/* 묘기 (항상 펼침) */}
-      <div className="grid grid-cols-2 gap-2">
-        {TRICKS.map((t) => (
-          <button
-            key={t.name}
-            type="button"
-            onClick={() => {
-              resumeAudio();
-              characterStore.playTrick(t.name);
-            }}
-            className={btn}
-          >
-            <span className="text-base">{t.emoji}</span>
-            {t.label}
-          </button>
-        ))}
-      </div>
+      {TRICKS.map((t) => (
+        <button
+          key={t.name}
+          type="button"
+          onClick={() => {
+            resumeAudio();
+            characterStore.playTrick(t.name);
+          }}
+          className={btn}
+        >
+          <span className="text-base">{t.emoji}</span>
+          {t.label}
+        </button>
+      ))}
     </div>
   );
 }
