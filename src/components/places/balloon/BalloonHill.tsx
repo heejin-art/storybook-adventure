@@ -22,19 +22,31 @@ const COLORS = ["#f6859b", "#ffd06b", "#9ad0f0", "#c4a6f0", "#ff9e7a", "#8fe0b0"
 export function BalloonHill() {
   const cx = waypointX(WAYPOINTS.balloon);
 
-  const balloons = useMemo(
-    () =>
-      Array.from({ length: 9 }, (_, i) => ({
-        x: cx + (seeded(i, 1) - 0.5) * 14,
-        y: 2.2 + seeded(i, 2) * 2.6,
-        z: -2 + seeded(i, 3) * 4,
-        color: COLORS[i % COLORS.length],
-        scale: 0.7 + seeded(i, 4) * 0.5,
-        phase: seeded(i, 5) * 10,
-        key: i,
-      })),
-    [cx],
-  );
+  const balloons = useMemo(() => {
+    // 배경 풍선들 — 너무 높지 않게(화면 안에 들어오도록) 적당히 흩뿌림
+    const arr = Array.from({ length: 8 }, (_, i) => ({
+      x: cx + (seeded(i, 1) - 0.5) * 10,
+      y: 2.1 + seeded(i, 2) * 1.4, // 2.1~3.5
+      z: -2 + seeded(i, 3) * 4,
+      color: COLORS[i % COLORS.length],
+      scale: 0.6 + seeded(i, 4) * 0.4,
+      phase: seeded(i, 5) * 10,
+      key: i,
+      main: false,
+    }));
+    // 또또가 멈추는 자리 정중앙의 또렷한 "터뜨리기" 풍선
+    arr.push({
+      x: cx + 1.0,
+      y: 1.75, // 눈높이 — 잘 보이고 누르기 쉬움
+      z: 0.4,
+      color: "#f6859b",
+      scale: 1.1,
+      phase: 2.5,
+      key: 99,
+      main: true,
+    });
+    return arr;
+  }, [cx]);
 
   return (
     <group>
@@ -52,6 +64,7 @@ function Balloon({
   color,
   scale,
   phase,
+  main = false,
 }: {
   x: number;
   y: number;
@@ -59,6 +72,7 @@ function Balloon({
   color: string;
   scale: number;
   phase: number;
+  main?: boolean;
 }) {
   const g = useRef<Group>(null);
   const popped = useRef(0); // 0 정상 ~ 1 터짐
@@ -121,11 +135,19 @@ function Balloon({
         <cylinderGeometry args={[0.006, 0.006, 1.5, 4]} />
         <meshBasicMaterial color="#7a6a5a" />
       </mesh>
-      {/* 빛 번짐 */}
-      <Glow color={color} size={1.5} opacity={0.4} pulse={0.7} />
-      <group position={[0, 0.6, 0]}>
-        <ClickHint label="터뜨리기" />
-      </group>
+      {/* 빛 번짐 — 메인 풍선은 더 밝게 */}
+      <Glow
+        color={color}
+        size={main ? 2.2 : 1.5}
+        opacity={main ? 0.6 : 0.4}
+        pulse={main ? 1.2 : 0.7}
+      />
+      {/* "터뜨리기" 힌트는 또렷한 메인 풍선에만 — 너무 위로 안 가게 살짝만 위 */}
+      {main && (
+        <group position={[0, 0.5, 0]}>
+          <ClickHint label="터뜨리기" />
+        </group>
+      )}
     </group>
   );
 }

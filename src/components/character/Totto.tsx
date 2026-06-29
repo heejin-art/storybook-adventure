@@ -66,13 +66,28 @@ export function Totto() {
   );
 }
 
-/** 급식 그릇 — 간식/물을 줄 때만 또또 앞(바닥)에 나타난다. */
+// 간식 사료 — 그릇에 수북이 쌓이도록
+const KIBBLE: [number, number, number][] = [
+  [0, 0, 0],
+  [0.11, 0, 0.06],
+  [-0.1, 0, 0.05],
+  [0.05, 0, -0.1],
+  [-0.08, 0, -0.09],
+  [0.14, 0.01, -0.02],
+  [-0.14, 0.01, 0.01],
+  [0.02, 0.09, 0.0],
+  [0.07, 0.08, 0.06],
+  [-0.05, 0.08, -0.04],
+];
+
+/** 급식 그릇 — 간식(수북한 사료)/물(찰랑이는 물)을 줄 때만 또또 앞에 크게 나타난다. */
 function FeedBowl() {
   const grp = useRef<Group>(null);
-  const water = useRef<Mesh>(null);
+  const water = useRef<Group>(null);
   const treat = useRef<Group>(null);
+  const waterTop = useRef<Mesh>(null);
 
-  useFrame(() => {
+  useFrame((state) => {
     const f = characterStore.read().feeding;
     if (grp.current) {
       const s = MathUtils.lerp(grp.current.scale.x, f ? 1 : 0, 0.2);
@@ -81,46 +96,54 @@ function FeedBowl() {
     }
     if (water.current) water.current.visible = f === "water";
     if (treat.current) treat.current.visible = f === "treat";
+    // 물 찰랑찰랑
+    if (waterTop.current && f === "water") {
+      waterTop.current.position.y = 0.18 + Math.sin(state.clock.elapsedTime * 4) * 0.004;
+    }
   });
 
   return (
-    <group ref={grp} position={[0.82, 0, 0.05]} scale={0}>
-      {/* 그릇 몸통 */}
-      <mesh position={[0, 0.09, 0]} castShadow>
-        <cylinderGeometry args={[0.24, 0.17, 0.18, 20]} />
-        <meshStandardMaterial color="#d98a5a" roughness={0.6} />
+    <group ref={grp} position={[0.86, 0, 0.32]} scale={0}>
+      {/* 그릇(납작한 밥그릇) — 바구니처럼 안 보이게 단순하게 */}
+      <mesh position={[0, 0.11, 0]} castShadow>
+        <cylinderGeometry args={[0.33, 0.22, 0.22, 24]} />
+        <meshStandardMaterial color="#cf8050" roughness={0.6} />
       </mesh>
-      {/* 그릇 테두리 */}
-      <mesh position={[0, 0.18, 0]}>
-        <torusGeometry args={[0.22, 0.03, 8, 24]} />
-        <meshStandardMaterial color="#c2724a" roughness={0.6} />
+      {/* 안쪽 바닥(움푹) */}
+      <mesh position={[0, 0.17, 0]}>
+        <cylinderGeometry args={[0.29, 0.29, 0.04, 24]} />
+        <meshStandardMaterial color="#b06a40" roughness={0.7} />
       </mesh>
-      {/* 물 */}
-      <mesh ref={water} position={[0, 0.16, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[0.2, 24]} />
-        <meshStandardMaterial
-          color="#7fc3e0"
-          transparent
-          opacity={0.85}
-          metalness={0.3}
-          roughness={0.15}
-        />
-      </mesh>
-      {/* 간식(사료알) */}
-      <group ref={treat} position={[0, 0.14, 0]}>
-        {(
-          [
-            [0, 0, 0.06],
-            [0.08, 0, -0.05],
-            [-0.07, 0.01, -0.03],
-            [0.02, 0.05, 0],
-          ] as [number, number, number][]
-        ).map((p, i) => (
-          <mesh key={i} position={p}>
-            <dodecahedronGeometry args={[0.052, 0]} />
+
+      {/* 물그릇 — 파란 물이 그득히 (또렷하게) */}
+      <group ref={water}>
+        <mesh ref={waterTop} position={[0, 0.2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[0.3, 30]} />
+          <meshStandardMaterial
+            color="#4aa6e0"
+            emissive="#2a6fa0"
+            emissiveIntensity={0.25}
+            transparent
+            opacity={0.95}
+            metalness={0.35}
+            roughness={0.12}
+          />
+        </mesh>
+        {/* 물빛 반사 */}
+        <mesh position={[0.08, 0.205, 0.05]} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[0.06, 14]} />
+          <meshBasicMaterial color="#ffffff" transparent opacity={0.6} />
+        </mesh>
+      </group>
+
+      {/* 간식 — 사료 한가득(수북이) */}
+      <group ref={treat} position={[0, 0.18, 0]}>
+        {KIBBLE.map((p, i) => (
+          <mesh key={i} position={p} castShadow>
+            <dodecahedronGeometry args={[0.07, 0]} />
             <meshStandardMaterial
               color={["#a5703f", "#8a5a30", "#b5824a"][i % 3]}
-              roughness={0.75}
+              roughness={0.8}
             />
           </mesh>
         ))}

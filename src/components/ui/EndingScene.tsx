@@ -13,16 +13,11 @@ import { gateStore } from "@/components/world/gateStore";
  * → "그냥 스크롤하다 끝나는" 느낌 대신, 또또가 배웅하는 다정한 엔딩.
  */
 
-// 애교 시퀀스 — greet(돌아보며 꼬리 흔들기) + 귀여운 트릭들을 차례로
+// 엔딩 시퀀스 — 돌아보며 인사 → 손! → 꼬리 살랑 → (스르륵 엎드려 눈감고 잠)
 const AEGYO: ({ kind: "greet"; ms: number } | { kind: "trick"; name: Parameters<typeof characterStore.playTrick>[0] })[] = [
-  { kind: "greet", ms: 1600 },
-  { kind: "trick", name: "shake" }, // 손!
-  { kind: "greet", ms: 1400 },
-  { kind: "trick", name: "spin" }, // 뱅글
-  { kind: "trick", name: "roll" }, // 데굴
-  { kind: "greet", ms: 1400 },
-  { kind: "trick", name: "jump" }, // 폴짝
-  { kind: "trick", name: "shake" }, // 손!
+  { kind: "greet", ms: 1500 }, // 돌아보며 꼬리 흔들기
+  { kind: "trick", name: "shake" }, // 손! (귀여운 인사)
+  { kind: "greet", ms: 1500 }, // 꼬리 살랑살랑
 ];
 
 export function EndingScene() {
@@ -46,12 +41,9 @@ export function EndingScene() {
     let i = 0;
     const step = () => {
       if (i >= AEGYO.length) {
-        // 잠깐 사용자를 향해 꼬리 흔들며 배웅 → 집 안으로 숑 → 창문으로 빼꼼
-        characterStore.playGreeting(600000);
-        timer.current = setTimeout(() => {
-          characterStore.setVanished(true); // 집 안으로 숑 사라짐
-          setCard(true); // 창문 또또 + 인사말
-        }, 2600);
+        // 마무리: 스르륵 엎드려 눈 감고 새근새근 잠
+        characterStore.setSleeping(true);
+        timer.current = setTimeout(() => setCard(true), 1600);
         return;
       }
       const a = AEGYO[i++];
@@ -84,7 +76,7 @@ export function EndingScene() {
             className="font-display text-lg text-ink md:text-xl"
             style={{ textShadow: "0 1px 16px rgba(255,250,238,0.7)" }}
           >
-            🐾 끝까지 함께 걸어줘서 고마워요
+            💤 또또가 새근새근 잠들었어요 · 오늘 산책 고마웠어요
           </motion.p>
           <button
             type="button"

@@ -191,11 +191,15 @@ export function PlaceholderModel() {
         nextBlink.current = 2 + Math.abs(Math.sin(time * 9.3)) * 4; // 다음 깜빡임까지
       }
     }
-    // 신나면 눈을 가늘게(반달 ^^). scale.y만 조절(최소값 보장 → 노멀 행렬 안정).
+    // 신나면 눈을 가늘게(반달 ^^). 잠들면 스르륵 감김. scale.y만 조절(최소값 보장).
     const squint = 1 - hap * 0.55;
-    const eyeY = Math.max(0.12, eyeScaleY * squint);
-    if (eyeL.current) eyeL.current.scale.y = eyeY;
-    if (eyeR.current) eyeR.current.scale.y = eyeY;
+    const eyeTarget = s.sleeping ? 0.05 : Math.max(0.12, eyeScaleY * squint);
+    // 잠들 땐 천천히(스르륵) 감기고, 평소엔 즉시(깜빡임 유지)
+    const eyeLerp = s.sleeping ? 0.05 : 1;
+    if (eyeL.current)
+      eyeL.current.scale.y = MathUtils.lerp(eyeL.current.scale.y, eyeTarget, eyeLerp);
+    if (eyeR.current)
+      eyeR.current.scale.y = MathUtils.lerp(eyeR.current.scale.y, eyeTarget, eyeLerp);
 
     // ── 혀: 입에 딱 붙어, 헥헥(신날 때)이나 물 할짝일 때만 입에서 자라남 ──
     // (위치는 입에 고정 — 떠다니지 않게. scale로만 입에서 나왔다 들어감)
@@ -253,8 +257,12 @@ export function PlaceholderModel() {
             ? Math.sin(time * 16) * 0.1 // 오독오독
             : Math.sin(time * 11) * 0.06; // 할짝할짝
         targetPitch = 0.7 + munch;
+      } else if (s.sleeping) {
+        // 고개를 살짝 떨구고 새근새근
+        targetYaw = -0.12;
+        targetPitch = 0.45 + Math.sin(time * 1.3) * 0.03;
       }
-      const hl = feedingNow ? 0.18 : 0.1;
+      const hl = s.sleeping ? 0.05 : feedingNow ? 0.18 : 0.1;
       head.current.rotation.y = MathUtils.lerp(head.current.rotation.y, targetYaw, hl);
       head.current.rotation.x = MathUtils.lerp(head.current.rotation.x, targetPitch, hl);
     }
@@ -411,14 +419,16 @@ export function PlaceholderModel() {
     // ── 간식/물 먹기: 살짝 낮춰 그릇으로 (머리는 위에서 숙임) ──
     if (s.feeding && !s.trick) targetY = -0.06;
 
-    // ── 엔딩: 집 안으로 "숑" (위로 솟구치며 작아져 사라짐) ──
-    const vanishScale = MathUtils.lerp(
-      root.current.scale.x,
-      s.vanished ? 0 : 1,
-      s.vanished ? 0.09 : 0.25,
-    );
-    root.current.scale.setScalar(vanishScale);
-    if (s.vanished) targetY += (1 - vanishScale) * 0.7;
+    // ── 엔딩: 스르륵 엎드려 새근새근 잠 ──
+    if (s.sleeping) {
+      targetY = -0.17; // 바닥에 폭 엎드림
+      targetZ = 0;
+      targetYrot = -0.2; // 살짝 우리 쪽으로
+      lerpY = 0.05; // 스르륵(천천히)
+      lerpZ = 0.05;
+      lerpYrot = 0.05;
+      legSet(1.3); // 앞다리 뻗어 엎드림
+    }
 
     root.current.position.y = MathUtils.lerp(root.current.position.y, targetY, lerpY);
     root.current.position.z = MathUtils.lerp(root.current.position.z, targetZpos, lerpY);

@@ -45,6 +45,8 @@ export function TottoFX() {
   const prevTrick = useRef<TrickName | null>(null);
   const bubbleT = useRef(0);
   const [word, setWord] = useState<string | null>(null);
+  const prevSleeping = useRef(false);
+  const [zzz, setZzz] = useState(false);
 
   const particles = useMemo<Particle[]>(
     () =>
@@ -124,6 +126,12 @@ export function TottoFX() {
       }
       if (bubbleT.current <= 0) setWord(null);
     }
+
+    // 잠들면 💤 표시
+    if (s.sleeping !== prevSleeping.current) {
+      prevSleeping.current = s.sleeping;
+      setZzz(s.sleeping);
+    }
   });
 
   return (
@@ -162,6 +170,23 @@ export function TottoFX() {
               }}
             >
               {word}
+            </div>
+          </Html>
+        </group>
+      )}
+
+      {/* 잠들면 머리 위로 💤 — 둥실둥실 떠오름 */}
+      {zzz && (
+        <group position={[HEAD.x + 0.35, HEAD.y + 0.25, 0]}>
+          <Html center distanceFactor={9} pointerEvents="none" zIndexRange={[20, 0]}>
+            <div
+              style={{
+                fontSize: "22px",
+                userSelect: "none",
+                animation: "totto-zzz 2.6s ease-in-out infinite",
+              }}
+            >
+              💤
             </div>
           </Html>
         </group>
