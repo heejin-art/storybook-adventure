@@ -5,6 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { Group, MathUtils, Vector3 } from "three";
 import { journeyStore } from "./journeyStore";
 import { worldXAt } from "./journeyPath";
+import { characterStore } from "@/components/character/characterStore";
 
 /**
  * 여정 카메라 리그 — 또또를 항상 화면 중심에 두고 따라가는 사이드뷰.
@@ -27,6 +28,7 @@ export function JourneyRig({ children }: { children: ReactNode }) {
   const smoothX = useRef(0); // 또또·카메라가 공유하는 부드러운 위치
   const introT = useRef(0); // 시네마틱 인트로 타이머
   const roll = useRef(0);
+  const zoom = useRef(0); // 트릭 중 살짝 줌인(주목 연출)
 
   useFrame((state, delta) => {
     const { progress, velocity } = journeyStore.read();
@@ -49,9 +51,13 @@ export function JourneyRig({ children }: { children: ReactNode }) {
     const breathY = Math.sin(t * 0.45) * 0.04;
     const breathX = Math.sin(t * 0.27) * 0.05;
 
+    // 트릭이 발동되면 카메라가 부드럽게 살짝 다가가 또또를 주목
+    const trickActive = characterStore.read().trick !== null;
+    zoom.current = MathUtils.lerp(zoom.current, trickActive ? 1 : 0, 0.06);
+
     // 속도에 따라 더 앞을 보고(여행감) 카메라가 살짝 뒤로 빠짐(역동감)
-    const aheadDyn = AHEAD + velocity * 1.4;
-    const distDyn = CAM_DIST + velocity * 0.9;
+    const aheadDyn = AHEAD + velocity * 1.4 - zoom.current * 0.5;
+    const distDyn = CAM_DIST + velocity * 0.9 - zoom.current * 1.4;
 
     camera.position.x = MathUtils.lerp(
       camera.position.x,

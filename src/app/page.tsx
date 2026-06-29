@@ -6,6 +6,7 @@ import { Hero } from "@/components/ui/Hero";
 import { DiscoveryOverlay } from "@/components/ui/DiscoveryOverlay";
 import { AtmosphereOverlay } from "@/components/ui/AtmosphereOverlay";
 import { TrickBar } from "@/components/ui/TrickBar";
+import { AudioController } from "@/components/audio/AudioController";
 
 // 3D 캔버스는 SSR 비활성(브라우저 전용 API 사용)
 const WorldCanvas = dynamic(
@@ -28,6 +29,7 @@ export default function Home() {
       <Hero />
       <DiscoveryOverlay />
       <TrickBar />
+      <AudioController />
       <ScrollController heightVh={1800} />
     </>
   );
