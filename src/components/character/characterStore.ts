@@ -41,6 +41,13 @@ export const TRICK_DURATION: Record<TrickName, number> = {
   roll: 1400,
 };
 
+/** 간식/물 주기 — 또또가 그릇으로 다가가 먹고/마신다 */
+export type FeedKind = "treat" | "water";
+export const FEED_DURATION: Record<FeedKind, number> = {
+  treat: 2600, // 오독오독 씹기
+  water: 3400, // 할짝할짝 마시기
+};
+
 type Snapshot = {
   locomotion: LocomotionState;
   intensity: number;
@@ -49,6 +56,10 @@ type Snapshot = {
   gazeYaw: number;
   gazePitch: number;
   trick: TrickName | null;
+  /** 간식/물 먹는 중 (null이면 아님) */
+  feeding: FeedKind | null;
+  /** 엔딩: 집 안으로 숑 사라짐 */
+  vanished: boolean;
 };
 
 let locomotion: LocomotionState = "idle";
@@ -58,6 +69,9 @@ let gazeYaw = 0;
 let gazePitch = 0;
 let trick: TrickName | null = null;
 let trickTimer: ReturnType<typeof setTimeout> | null = null;
+let feeding: FeedKind | null = null;
+let feedTimer: ReturnType<typeof setTimeout> | null = null;
+let vanished = false;
 
 let greetUntil = 0; // greet 비트 종료 시각(performance.now 기준)
 
@@ -68,11 +82,13 @@ let cached: Snapshot = {
   gazeYaw: 0,
   gazePitch: 0,
   trick: null,
+  feeding: null,
+  vanished: false,
 };
 const listeners = new Set<() => void>();
 
 function snapshot(): Snapshot {
-  return { locomotion, intensity, behavior, gazeYaw, gazePitch, trick };
+  return { locomotion, intensity, behavior, gazeYaw, gazePitch, trick, feeding, vanished };
 }
 
 function emit() {
@@ -81,6 +97,8 @@ function emit() {
     next.locomotion !== cached.locomotion ||
     next.behavior !== cached.behavior ||
     next.trick !== cached.trick ||
+    next.feeding !== cached.feeding ||
+    next.vanished !== cached.vanished ||
     Math.abs(next.intensity - cached.intensity) > 0.02
   ) {
     cached = next;
@@ -138,6 +156,24 @@ export const characterStore = {
     behavior = "greet";
     gazeYaw = 0.6; // 사용자(카메라) 쪽으로 고개 (양수 = 카메라 방향)
     gazePitch = 0.12;
+    emit();
+  },
+
+  /** 간식/물 주기 — 또또가 그릇으로 고개를 숙여 먹고/마신다(자동 해제) */
+  feed(kind: FeedKind) {
+    feeding = kind;
+    emit();
+    if (feedTimer) clearTimeout(feedTimer);
+    feedTimer = setTimeout(() => {
+      feeding = null;
+      feedTimer = null;
+      emit();
+    }, FEED_DURATION[kind]);
+  },
+
+  /** 엔딩: 집 안으로 숑 사라짐 토글 */
+  setVanished(v: boolean) {
+    vanished = v;
     emit();
   },
 };

@@ -46,9 +46,12 @@ export function EndingScene() {
     let i = 0;
     const step = () => {
       if (i >= AEGYO.length) {
-        // 마무리: 사용자를 향해 오래 꼬리 흔들며 배웅(애교 유지)
+        // 잠깐 사용자를 향해 꼬리 흔들며 배웅 → 집 안으로 숑 → 창문으로 빼꼼
         characterStore.playGreeting(600000);
-        setCard(true);
+        timer.current = setTimeout(() => {
+          characterStore.setVanished(true); // 집 안으로 숑 사라짐
+          setCard(true); // 창문 또또 + 인사말
+        }, 2600);
         return;
       }
       const a = AEGYO[i++];

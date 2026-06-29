@@ -197,12 +197,16 @@ export function PlaceholderModel() {
     if (eyeL.current) eyeL.current.scale.y = eyeY;
     if (eyeR.current) eyeR.current.scale.y = eyeY;
 
-    // ── 혀: 신나거나 달릴 때 입에서 살짝 나와 헥헥 ──
+    // ── 혀: 입에 딱 붙어, 헥헥(신날 때)이나 물 할짝일 때만 입에서 자라남 ──
+    // (위치는 입에 고정 — 떠다니지 않게. scale로만 입에서 나왔다 들어감)
     if (tongue.current) {
-      const pant = hap;
-      const out = pant * (0.7 + Math.abs(Math.sin(time * 9)) * 0.3);
-      tongue.current.scale.setScalar(MathUtils.lerp(tongue.current.scale.x, out, 0.2));
-      tongue.current.position.y = -0.2 - pant * 0.04;
+      const lapping = s.feeding === "water";
+      const target = lapping
+        ? 0.55 + Math.abs(Math.sin(time * 13)) * 0.6 // 물 할짝할짝
+        : hap * (0.7 + Math.abs(Math.sin(time * 9)) * 0.25); // 헥헥
+      tongue.current.scale.setScalar(
+        MathUtils.lerp(tongue.current.scale.x, target, 0.25),
+      );
     }
 
     // 멈춰 있던 시간 → 멈추면 자연스럽게 플레이어(카메라)를 바라봄
@@ -236,12 +240,23 @@ export function PlaceholderModel() {
       const idlePitch = !isMoving ? Math.sin(time * 1.1) * 0.04 : 0;
       // 걸을 때 보행 리듬에 맞춰 머리 끄덕(상하) — 살아있는 느낌
       const walkNod = Math.sin(phase + 0.5) * 0.05 * move;
+      const feedingNow = s.feeding !== null;
       // gazeYaw>0 = 카메라(+Z, 사용자) 쪽을 바라봄. 멈추면 idleLook만큼 정면을 봄
-      const targetYaw =
+      let targetYaw =
         -s.gazeYaw * 0.9 - idleLook * 0.34 + idleYaw + glanceYaw.current + pointerYaw;
-      const targetPitch = -s.gazePitch * 0.7 + idlePitch + walkNod + pointerPitch;
-      head.current.rotation.y = MathUtils.lerp(head.current.rotation.y, targetYaw, 0.1);
-      head.current.rotation.x = MathUtils.lerp(head.current.rotation.x, targetPitch, 0.1);
+      let targetPitch = -s.gazePitch * 0.7 + idlePitch + walkNod + pointerPitch;
+      if (feedingNow) {
+        // 앞 바닥의 그릇으로 고개를 숙이고, 먹는/마시는 리듬
+        targetYaw = 0;
+        const munch =
+          s.feeding === "treat"
+            ? Math.sin(time * 16) * 0.1 // 오독오독
+            : Math.sin(time * 11) * 0.06; // 할짝할짝
+        targetPitch = 0.7 + munch;
+      }
+      const hl = feedingNow ? 0.18 : 0.1;
+      head.current.rotation.y = MathUtils.lerp(head.current.rotation.y, targetYaw, hl);
+      head.current.rotation.x = MathUtils.lerp(head.current.rotation.x, targetPitch, hl);
     }
 
     // ── 귀: 스프링 물리 — 걸을 때 펄럭, 멈추면 살랑 + 가끔 쫑긋, 멈춰도 잠깐 출렁 ──
@@ -393,6 +408,18 @@ export function PlaceholderModel() {
         break;
     }
 
+    // ── 간식/물 먹기: 살짝 낮춰 그릇으로 (머리는 위에서 숙임) ──
+    if (s.feeding && !s.trick) targetY = -0.06;
+
+    // ── 엔딩: 집 안으로 "숑" (위로 솟구치며 작아져 사라짐) ──
+    const vanishScale = MathUtils.lerp(
+      root.current.scale.x,
+      s.vanished ? 0 : 1,
+      s.vanished ? 0.09 : 0.25,
+    );
+    root.current.scale.setScalar(vanishScale);
+    if (s.vanished) targetY += (1 - vanishScale) * 0.7;
+
     root.current.position.y = MathUtils.lerp(root.current.position.y, targetY, lerpY);
     root.current.position.z = MathUtils.lerp(root.current.position.z, targetZpos, lerpY);
     root.current.rotation.z = MathUtils.lerp(root.current.rotation.z, targetZ, lerpZ);
@@ -472,10 +499,10 @@ export function PlaceholderModel() {
                 <sphereGeometry args={[0.03, 8, 8]} />
                 <meshStandardMaterial color="#6b5648" roughness={0.5} />
               </mesh>
-              {/* 혀 — 평소엔 scale 0, 신나면 입 밑으로 나와 헥헥 */}
-              <group ref={tongue} position={[0.17, -0.2, 0]} scale={0}>
-                <mesh position={[0.04, -0.05, 0]} rotation={[0, 0, -0.3]}>
-                  <capsuleGeometry args={[0.045, 0.09, 4, 8]} />
+              {/* 혀 — 입(입꼬리)에 딱 붙어, 아래로 살짝 늘어짐. 평소 scale 0 */}
+              <group ref={tongue} position={[0.2, -0.13, 0]} scale={0}>
+                <mesh position={[0.01, -0.05, 0]} rotation={[0.5, 0, 0]}>
+                  <capsuleGeometry args={[0.04, 0.06, 4, 8]} />
                   <meshStandardMaterial color={TONGUE} roughness={0.4} />
                 </mesh>
               </group>
