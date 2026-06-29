@@ -74,7 +74,7 @@ export function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1, delay: 2.8 }}
-        className="absolute inset-x-0 bottom-10 flex flex-col items-center gap-2"
+        className="absolute inset-x-0 bottom-28 flex flex-col items-center gap-2 sm:bottom-10"
       >
         <p
           className="font-display text-base text-ink/80"

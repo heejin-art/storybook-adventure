@@ -41,7 +41,7 @@ export function DiscoveryOverlay() {
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
             transition={{ duration: 0.55, ease: "easeOut" }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-xl rounded-[30px] border border-clay/30 bg-cream/90 px-9 py-8 text-left shadow-[0_30px_80px_-30px_rgba(40,34,26,0.7)] backdrop-blur-md md:px-12 md:py-10"
+            className="relative max-h-[85vh] w-full max-w-xl overflow-y-auto rounded-[30px] border border-clay/30 bg-cream/90 px-6 py-7 text-left shadow-[0_30px_80px_-30px_rgba(40,34,26,0.7)] backdrop-blur-md sm:px-9 sm:py-8 md:px-12 md:py-10"
           >
             <Content id={active} />
 
@@ -139,7 +139,7 @@ function Label({ children, center }: { children: React.ReactNode; center?: boole
 function Title({ children, center }: { children: React.ReactNode; center?: boolean }) {
   return (
     <p
-      className={`mt-3 font-display text-3xl leading-snug text-ink md:text-4xl ${center ? "text-center" : ""}`}
+      className={`mt-3 font-display text-2xl leading-snug text-ink sm:text-3xl md:text-4xl ${center ? "text-center" : ""}`}
     >
       {children}
     </p>

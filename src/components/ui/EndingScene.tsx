@@ -68,7 +68,7 @@ export function EndingScene() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="pointer-events-none fixed inset-x-0 bottom-16 z-30 flex flex-col items-center gap-3 px-6"
+          className="pointer-events-none fixed inset-x-0 bottom-32 z-30 flex flex-col items-center gap-3 px-6 sm:bottom-16"
         >
           <motion.p
             animate={{ y: [0, -4, 0] }}

@@ -55,7 +55,7 @@ export function GateHint() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 18 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="pointer-events-none fixed inset-x-0 bottom-24 z-30 flex flex-col items-center px-6"
+          className="pointer-events-none fixed inset-x-0 bottom-32 z-30 flex flex-col items-center px-6 sm:bottom-24"
         >
           {/* 위를 가리키는 통통 튀는 발자국 — 마커를 누르라는 신호 */}
           <motion.span
