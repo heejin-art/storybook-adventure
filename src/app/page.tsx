@@ -5,6 +5,7 @@ import { ScrollController } from "@/components/world/ScrollController";
 import { Hero } from "@/components/ui/Hero";
 import { DiscoveryOverlay } from "@/components/ui/DiscoveryOverlay";
 import { GateHint } from "@/components/ui/GateHint";
+import { EndingScene } from "@/components/ui/EndingScene";
 import { AtmosphereOverlay } from "@/components/ui/AtmosphereOverlay";
 import { TrickBar } from "@/components/ui/TrickBar";
 import { AudioController } from "@/components/audio/AudioController";
@@ -30,6 +31,7 @@ export default function Home() {
       <Hero />
       <DiscoveryOverlay />
       <GateHint />
+      <EndingScene />
       <TrickBar />
       <AudioController />
       <ScrollController heightVh={1800} />

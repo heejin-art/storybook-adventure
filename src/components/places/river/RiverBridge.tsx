@@ -18,7 +18,8 @@ export function RiverBridge() {
 
   return (
     <group>
-      <Marker id="business" position={[cx, 1.9, 0]} color="#bcd0f0" label="사업 이야기" />
+      {/* 마커는 다리 위·앞쪽으로 띄워 전경 요소에 가리지 않게 */}
+      <Marker id="business" position={[cx, 2.0, 0.9]} color="#bcd0f0" label="사업 이야기" />
       {/* 강물 (앞뒤로 길게 흐르는 잔잔한 수면) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[cx, 0.04, 0]} receiveShadow>
         <planeGeometry args={[6.5, 44]} />

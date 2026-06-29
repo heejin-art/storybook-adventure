@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { Color } from "three";
 import { getToonGradient } from "@/components/character/toonGradient";
-import { JOURNEY_LENGTH } from "@/components/world/journeyPath";
+import { JOURNEY_LENGTH, WAYPOINTS } from "@/components/world/journeyPath";
 
 /**
  * 부드러운 토ون 나무 — 모양·색·기울기·크기를 랜덤화해 같은 나무가 없게.
@@ -71,9 +71,21 @@ function buildTrees(): TreeData[] {
     const scale = 0.75 + seeded(id, 3) * 1.0;
     trees.push(buildTree(id, x, z, scale));
   }
-  // 앞쪽(전경) 큰 나무 — 깊이 프레이밍
+  // 장소(클릭 마커) X 좌표 — 전경 나무가 이 앞을 가리면 마커가 안 보이므로 비워둔다
+  const placeX = [
+    WAYPOINTS.home,
+    (WAYPOINTS.careerStart + WAYPOINTS.careerEnd) / 2,
+    WAYPOINTS.mushroom,
+    WAYPOINTS.balloon,
+    WAYPOINTS.river,
+    WAYPOINTS.star,
+    WAYPOINTS.ending,
+  ].map((p) => p * JOURNEY_LENGTH);
+
+  // 앞쪽(전경) 큰 나무 — 깊이 프레이밍. 단, 장소 앞은 비워 마커가 가려지지 않게.
   for (let i = 0; i < 10; i++, id++) {
     const x = 8 + seeded(id, 7) * (JOURNEY_LENGTH - 16);
+    if (placeX.some((px) => Math.abs(x - px) < 7)) continue; // 장소 앞이면 건너뜀
     const z = 3.2 + seeded(id, 8) * 2.4;
     const scale = 1.3 + seeded(id, 9) * 0.9;
     trees.push(buildTree(id, x, z, scale));

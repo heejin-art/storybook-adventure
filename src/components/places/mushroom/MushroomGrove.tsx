@@ -161,7 +161,7 @@ function Mushroom({
       {clickable && (
         <>
           <pointLight position={[0, 0.8, 0]} color={glow} intensity={6} distance={5} decay={2} />
-          <group position={[0, 1.5, 0]}>
+          <group position={[0, 0.85, 0]}>
             <ClickHint label="프로젝트 보기" />
           </group>
         </>
