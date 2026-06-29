@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Lenis from "lenis";
 import { journeyStore } from "./journeyStore";
 import { discoveryStore } from "./discoveryStore";
+import { gateStore } from "./gateStore";
 
 /**
  * 스크롤 → 여정 진행도 변환기.
@@ -22,9 +23,36 @@ export function ScrollController({ heightVh = 700 }: { heightVh?: number }) {
       easing: (t) => 1 - Math.pow(1 - t, 3),
     });
 
+    // scrollTo(immediate)가 'scroll'을 동기 재발생시켜 재귀(=freeze)하는 것을 막는 가드
+    let clamping = false;
+
     const update = () => {
+      if (clamping) return;
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      const p = max > 0 ? window.scrollY / max : 0;
+      // window.scrollY 대신 lenis.scroll(내부 스크롤 값)을 쓴다.
+      // scrollTo로 보정하면 즉시 반영되므로 재귀/지연 문제가 없다.
+      let y = lenis.scroll;
+
+      // ── 게이트(필수 관문) 잠금 ──
+      // 아직 안 본 게이트가 앞에 있으면 그 지점 너머로는 못 내려간다.
+      // 마커를 눌러 콘텐츠를 보면(=봤음) 잠금이 풀려 계속 스크롤된다.
+      const gate = gateStore.firstUnseen();
+      if (gate && max > 0) {
+        const ceilY = gate.progress * max;
+        if (y > ceilY + 1) {
+          y = ceilY;
+          clamping = true;
+          lenis.scrollTo(ceilY, { immediate: true, force: true });
+          clamping = false;
+          gateStore.bump(); // 더 내려가려 함 → "마커를 눌러라" 강조
+        }
+        // 게이트에 거의 도달하면 안내 배너 표시
+        gateStore.setActiveGate(y / max >= gate.progress - 0.02 ? gate.id : null);
+      } else {
+        gateStore.setActiveGate(null);
+      }
+
+      const p = max > 0 ? y / max : 0;
       const v = Math.min(Math.abs(lenis.velocity) / 24, 1);
       journeyStore.setProgress(p, v);
     };

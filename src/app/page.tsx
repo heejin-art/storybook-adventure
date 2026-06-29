@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { ScrollController } from "@/components/world/ScrollController";
 import { Hero } from "@/components/ui/Hero";
 import { DiscoveryOverlay } from "@/components/ui/DiscoveryOverlay";
+import { GateHint } from "@/components/ui/GateHint";
 import { AtmosphereOverlay } from "@/components/ui/AtmosphereOverlay";
 import { TrickBar } from "@/components/ui/TrickBar";
 import { AudioController } from "@/components/audio/AudioController";
@@ -28,6 +29,7 @@ export default function Home() {
       <AtmosphereOverlay />
       <Hero />
       <DiscoveryOverlay />
+      <GateHint />
       <TrickBar />
       <AudioController />
       <ScrollController heightVh={1800} />

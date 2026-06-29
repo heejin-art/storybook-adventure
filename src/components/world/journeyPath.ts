@@ -41,3 +41,61 @@ export function careerNodeProgress(index: number, total: number): number {
   if (total <= 1) return (careerStart + careerEnd) / 2;
   return careerStart + ((careerEnd - careerStart) * index) / (total - 1);
 }
+
+/**
+ * 게이트(필수 관문) — 이 지점들은 "마커를 눌러 보고 나야" 더 진행할 수 있다.
+ * 아직 안 본 게이트가 앞에 있으면 스크롤이 그 지점에서 막히고(또또가 마커 앞에 멈춤),
+ * 마커를 클릭해 콘텐츠를 열면(=봤음) 잠금이 풀려 계속 스크롤된다.
+ *
+ * id 는 discoveryStore / Marker 의 id 와 일치해야 한다. (마커 위치 = progress)
+ * 새 관문을 추가하려면 이 배열에 항목만 넣으면 된다.
+ */
+export const GATES: {
+  id: string;
+  progress: number;
+  title: string;
+  hint: string;
+}[] = [
+  {
+    id: "about",
+    progress: WAYPOINTS.home,
+    title: "희진 소개",
+    hint: "또또 옆 반짝이는 마커를 눌러 ‘희진 소개’를 보고 가요.",
+  },
+  {
+    id: "career",
+    progress: (WAYPOINTS.careerStart + WAYPOINTS.careerEnd) / 2, // 커리어 마커 위치(0.33)
+    title: "희진의 길",
+    hint: "또또 옆 반짝이는 마커를 눌러 ‘희진의 길’을 보고 가요.",
+  },
+  {
+    id: "notalk",
+    progress: WAYPOINTS.mushroom,
+    title: "노톡",
+    hint: "또또 옆 반짝이는 버섯을 눌러 ‘노톡’ 이야기를 보고 가요.",
+  },
+  {
+    id: "todaypop",
+    progress: WAYPOINTS.balloon,
+    title: "오늘뽁",
+    hint: "또또 옆 풍선을 눌러(톡!) ‘오늘뽁’ 이야기를 보고 가요.",
+  },
+  {
+    id: "business",
+    progress: WAYPOINTS.river,
+    title: "사업 이야기",
+    hint: "또또 옆 반짝이는 마커를 눌러 ‘사업 이야기’를 보고 가요.",
+  },
+  {
+    id: "future",
+    progress: WAYPOINTS.star,
+    title: "앞으로의 꿈",
+    hint: "또또 옆 반짝이는 마커를 눌러 ‘앞으로의 꿈’을 보고 가요.",
+  },
+  {
+    id: "ending",
+    progress: WAYPOINTS.ending,
+    title: "마지막 인사",
+    hint: "또또 옆 반짝이는 마커를 눌러 ‘마지막 인사’를 보고 가요.",
+  },
+];
